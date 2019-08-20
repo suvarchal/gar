@@ -8,6 +8,11 @@ python:
 - '3.6'
 before_install:
  - travis_retry pip install click
+ - sudo apt-get install devscripts
+ - sudo apt-get install python3-all
+ - sudo apt-get install python3-setuptools
+ - sudo apt-get install python3-pytest
+ - sudo apt-get install python3-tox
 script:
  - python setup.py install
  - gar --help
