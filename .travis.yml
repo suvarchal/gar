@@ -7,11 +7,12 @@ addons:
 python:
 - '3.6'
 before_install:
- - travis_retry pip install click
+ - sudo apt-get install fakeroot
  - sudo apt-get install devscripts
  - sudo apt-get install python3-all
  - sudo apt-get install python3-setuptools
  - sudo apt-get install python3-pytest
+ - travis_retry pip install click
 script:
  - debuild -us -uc -I -i 
  - mkdir -p upload/dist
