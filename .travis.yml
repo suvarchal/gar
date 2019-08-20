@@ -1,0 +1,20 @@
+sudo: true
+language: python
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+python:
+- '3.6'
+before_install:
+ - travis_retry pip install click
+script:
+ - python setup.py install
+deploy:
+ provider: pages
+ skip_cleanup: true
+ local_dir: ./debian
+ github_token: $GITHUB_TOKEN
+email: suvarchal.kumar@gmail.com
+committer-from-gh: true
+target_branch: gh-pages
