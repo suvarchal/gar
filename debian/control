@@ -1,0 +1,16 @@
+Source: gar
+Maintainer: Suvarchal K. Cheedela <suvarchal.kumar@gmail.com>
+Section: python
+Priority: optional
+Build-Depends: 
+ debhelper (>= 11~), 
+ dh-python,
+ python3-all, 
+ python3-setuptools,
+ python3-pytest,
+Standards-Version: 4.3.0
+
+Package: python3-gar
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}, python3-click
+Description: Group archiving tool
