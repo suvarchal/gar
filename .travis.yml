@@ -1,20 +1,17 @@
 sudo: true
 language: python
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - jonathonf/debhelper-11
 python:
 - '3.6'
 before_install:
- - sudo apt-get install fakeroot
- - sudo apt-get install debhelper
- - sudo apt-get install dh-python
- - sudo apt-get install devscripts
- - sudo apt-get install python3-all
- - sudo apt-get install python3-setuptools
- - sudo apt-get install python3-pytest
+ - sudo add-apt-repository ppa:jonathonf/debhelper-11
+ - sudo apt-get update -q
+ - sudo apt-get install fakeroot -y 
+ - sudo apt-get install debhelper -y
+ - sudo apt-get install dh-python -y
+ - sudo apt-get install devscripts -y
+ - sudo apt-get install python3-all -y
+ - sudo apt-get install python3-setuptools -y
+ - sudo apt-get install python3-pytest -y
  - travis_retry pip install click
 script:
  - sudo apt-cache policy debhelper
