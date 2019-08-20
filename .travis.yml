@@ -10,7 +10,7 @@ before_install:
  - travis_retry pip install click
 script:
  - python setup.py install
- - gar
+ - gar --help
 deploy:
  provider: pages
  skip_cleanup: true
