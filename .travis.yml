@@ -13,12 +13,15 @@ before_install:
  - sudo apt-get install python3-setuptools
  - sudo apt-get install python3-pytest
 script:
- - python setup.py install
+ - debuild -us -uc -I -i 
+ - mkdir -p upload/dist
+ - mv gar_* upload/dist
+ - sudo apt-get install upload/dist/python3-gar_0.0.1_all.deb
  - gar --help
 deploy:
  provider: pages
  skip_cleanup: true
- local_dir: ./debian
+ local_dir: ./upload
  github_token: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com
