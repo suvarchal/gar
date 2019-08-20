@@ -10,10 +10,11 @@ before_install:
  - travis_retry pip install click
 script:
  - python setup.py install
+ - gar
 deploy:
  provider: pages
  skip_cleanup: true
- local_dir: ../debian
+ local_dir: ./debian
  github_token: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com
