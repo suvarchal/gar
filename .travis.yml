@@ -8,6 +8,8 @@ python:
 - '3.6'
 before_install:
  - sudo apt-get install fakeroot
+ - sudo apt-get install debhelper
+ - sudo apt-get install dh-python
  - sudo apt-get install devscripts
  - sudo apt-get install python3-all
  - sudo apt-get install python3-setuptools
