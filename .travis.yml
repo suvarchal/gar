@@ -16,6 +16,7 @@ before_install:
  - sudo apt-get install python3-pytest
  - travis_retry pip install click
 script:
+ - sudo apt-cache policy debhelper
  - debuild -us -uc -I -i 
  - mkdir -p upload/dist
  - mv gar_* upload/dist
