@@ -13,7 +13,7 @@ script:
 deploy:
  provider: pages
  skip_cleanup: true
- local_dir: ./debian
+ local_dir: ../debian
  github_token: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com
