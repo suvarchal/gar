@@ -18,8 +18,9 @@ script:
  - debuild -us -uc -I -i
  - ls ../gar_*
  - mkdir -p upload/dist
- - mv ../gar_* upload/dist
- - sudo apt-get install upload/dist/python3-gar_0.0.1_all.deb
+ - mv ../gar_* upload/dist/
+ - mv ../python3-gar_* upload/dist/
+ - sudo apt-get install `ls upload/dist/python3-gar_*.deb` -y
  - gar --help
 deploy:
  provider: pages
