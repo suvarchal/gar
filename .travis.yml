@@ -17,10 +17,8 @@ script:
  - sudo apt-cache policy debhelper
  - debuild -us -uc -I -i
  - ls ../gar_*
- - mkdir upload
- - mkdir upload/dist 
  - mkdir -p upload/dist
- - mv gar_* upload/dist
+ - mv ../gar_* upload/dist
  - sudo apt-get install upload/dist/python3-gar_0.0.1_all.deb
  - gar --help
 deploy:
