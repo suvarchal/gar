@@ -20,6 +20,8 @@ script:
  - mkdir -p upload/dist
  - mv ../gar_* upload/dist/
  - mv ../python3-gar_* upload/dist/
+ - ls upload/
+ - ls upload/dist/
  - sudo apt-get install `ls upload/dist/python3-gar_*.deb` -y
  - gar --help
 deploy:
