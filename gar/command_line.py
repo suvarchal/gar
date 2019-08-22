@@ -1,5 +1,5 @@
 import click
-from .copy import copy
+from .core import copy
 
 
 @click.command()
