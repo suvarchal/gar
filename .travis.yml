@@ -1,8 +1,6 @@
 sudo: true
 language: python
 python:
- - '3.4'
- - '3.5'
  - '3.6'
  - '3.7'
 before_install:
@@ -15,8 +13,11 @@ before_install:
  - sudo apt-get install python3-all -y
  - sudo apt-get install python3-setuptools -y
  - sudo apt-get install python3-pytest -y
+ - travis_retry pip install python-coveralls
  - travis_retry pip install click
+ - travis_retry pip install tox
 script:
+ - tox
  - sudo apt-cache policy debhelper
  - debuild -us -uc -I -i
  - ls ../gar_*
@@ -27,6 +28,9 @@ script:
  - ls upload/dist/
  - sudo apt-get install `ls ./upload/dist/python3-gar_*.deb` -y
  - gar --help
+ - pytest
+after_success:
+ - coveralls 
 deploy:
  provider: pages
  skip_cleanup: true
@@ -36,5 +40,8 @@ deploy:
  email: suvarchal.kumar@gmail.com
  committer-from-gh: true
  target_branch: gh-pages
+ on:
+   tags: true
+
 notifications:
   email: false
