@@ -1,0 +1,188 @@
+ dpkg-buildpackage -rfakeroot -D -us -uc -I -i
+dpkg-buildpackage: source package gar
+dpkg-buildpackage: source version 0.0.1
+dpkg-buildpackage: source distribution stable
+dpkg-buildpackage: source changed by Suvarchal K. Cheedela <suvarchal.kumar@gmail.com>
+ dpkg-source -I -i --before-build gar
+dpkg-buildpackage: host architecture amd64
+ fakeroot debian/rules clean
+dh clean --with python3 --buildsystem=pybuild --test-pytest 
+   dh_auto_clean -O--buildsystem=pybuild -O--test-pytest
+	pybuild --clean --test-pytest -i python{version} -p 3.5 --dir .
+I: pybuild base:184: python3.5 setup.py clean 
+running clean
+removing '/home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build' (and everything under it)
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
+  warnings.warn(msg)
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'python_requires'
+  warnings.warn(msg)
+'build/bdist.linux-x86_64' does not exist -- can't clean it
+'build/scripts-3.5' does not exist -- can't clean it
+	rm -rf .pybuild/
+	find . -name \*.pyc -exec rm {} \;
+   dh_autoreconf_clean -O--buildsystem=pybuild -O--test-pytest
+   dh_clean -O--buildsystem=pybuild -O--test-pytest
+	rm -f debian/debhelper-build-stamp
+	rm -rf debian/.debhelper/
+	rm -f -- debian/python3-gar.substvars debian/files
+	rm -fr -- debian/python3-gar/ debian/tmp/
+	find .  \( \( \
+		\( -path .\*/.git -o -path .\*/.svn -o -path .\*/.bzr -o -path .\*/.hg -o -path .\*/CVS \) -prune -o -type f -a \
+	        \( -name '#*#' -o -name '.*~' -o -name '*~' -o -name DEADJOE \
+		 -o -name '*.orig' -o -name '*.rej' -o -name '*.bak' \
+		 -o -name '.*.orig' -o -name .*.rej -o -name '.SUMS' \
+		 -o -name TAGS -o \( -path '*/.deps/*' -a -name '*.P' \) \
+		\) -exec rm -f {} + \) -o \
+		\( -type d -a -name autom4te.cache -prune -exec rm -rf {} + \) \)
+ dpkg-source -I -i -b gar
+dpkg-source: info: using source format '3.0 (native)'
+dpkg-source: info: building gar in gar_0.0.1.tar.xz
+dpkg-source: info: building gar in gar_0.0.1.dsc
+ debian/rules build
+dh build --with python3 --buildsystem=pybuild --test-pytest 
+   dh_update_autotools_config -O--buildsystem=pybuild -O--test-pytest
+   dh_autoreconf -O--buildsystem=pybuild -O--test-pytest
+   dh_auto_configure -O--buildsystem=pybuild -O--test-pytest
+	pybuild --configure --test-pytest -i python{version} -p 3.5 --dir .
+I: pybuild base:184: python3.5 setup.py config 
+running config
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
+  warnings.warn(msg)
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'python_requires'
+  warnings.warn(msg)
+   dh_auto_build -O--buildsystem=pybuild -O--test-pytest
+	pybuild --build --test-pytest -i python{version} -p 3.5 --dir .
+I: pybuild base:184: /usr/bin/python3 setup.py build 
+running build
+running build_py
+creating /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar
+copying gar/logger.py -> /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar
+copying gar/core.py -> /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar
+copying gar/command_line.py -> /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar
+copying gar/__init__.py -> /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar
+copying gar/lock.py -> /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'python_requires'
+  warnings.warn(msg)
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
+  warnings.warn(msg)
+   debian/rules override_dh_auto_test
+make[1]: Entering directory '/home/travis/build/suvarchal/gar'
+#python3 -m pytest 
+make[1]: Leaving directory '/home/travis/build/suvarchal/gar'
+   create-stamp debian/debhelper-build-stamp
+ fakeroot debian/rules binary
+dh binary --with python3 --buildsystem=pybuild --test-pytest 
+   dh_testroot -O--buildsystem=pybuild -O--test-pytest
+   dh_prep -O--buildsystem=pybuild -O--test-pytest
+	rm -f -- debian/python3-gar.substvars
+	rm -fr -- debian/.debhelper/generated/python3-gar/ debian/python3-gar/ debian/tmp/
+   dh_auto_install -O--buildsystem=pybuild -O--test-pytest
+	install -d debian/python3-gar
+	pybuild --install --test-pytest -i python{version} -p 3.5 --dir . --dest-dir /home/travis/build/suvarchal/gar/debian/python3-gar
+I: pybuild base:184: /usr/bin/python3 setup.py install --root /home/travis/build/suvarchal/gar/debian/python3-gar 
+running install
+running build
+running build_py
+running install_lib
+creating /home/travis/build/suvarchal/gar/debian/python3-gar/usr
+creating /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib
+creating /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5
+creating /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages
+creating /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar
+copying /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar/logger.py -> /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar
+copying /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar/core.py -> /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar
+copying /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar/command_line.py -> /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar
+copying /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar/__init__.py -> /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar
+copying /home/travis/build/suvarchal/gar/.pybuild/pythonX.Y_3.5/build/gar/lock.py -> /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar
+byte-compiling /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar/logger.py to logger.cpython-35.pyc
+byte-compiling /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar/core.py to core.cpython-35.pyc
+byte-compiling /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar/command_line.py to command_line.cpython-35.pyc
+byte-compiling /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar/__init__.py to __init__.cpython-35.pyc
+byte-compiling /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar/lock.py to lock.cpython-35.pyc
+running install_egg_info
+running egg_info
+creating gar.egg-info
+writing requirements to gar.egg-info/requires.txt
+writing entry points to gar.egg-info/entry_points.txt
+writing gar.egg-info/PKG-INFO
+writing dependency_links to gar.egg-info/dependency_links.txt
+writing top-level names to gar.egg-info/top_level.txt
+writing manifest file 'gar.egg-info/SOURCES.txt'
+reading manifest file 'gar.egg-info/SOURCES.txt'
+writing manifest file 'gar.egg-info/SOURCES.txt'
+Copying gar.egg-info to /home/travis/build/suvarchal/gar/debian/python3-gar/usr/lib/python3.5/dist-packages/gar-0.0.1.egg-info
+Skipping SOURCES.txt
+running install_scripts
+Installing gar script to /home/travis/build/suvarchal/gar/debian/python3-gar/usr/bin
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'long_description_content_type'
+  warnings.warn(msg)
+/usr/lib/python3.5/distutils/dist.py:261: UserWarning: Unknown distribution option: 'python_requires'
+  warnings.warn(msg)
+  File "/usr/lib/python3.5/dist-packages/gar/logger.py", line 35
+    with gzip.open(f'{dst}.gz', mode="wb") as zf:
+                             ^
+SyntaxError: invalid syntax
+
+   dh_installdocs -O--buildsystem=pybuild -O--test-pytest
+	install -d debian/python3-gar/usr/share/doc/python3-gar
+	install -d debian/.debhelper/generated/python3-gar
+	install -p -m0644 debian/copyright debian/python3-gar/usr/share/doc/python3-gar/copyright
+   dh_installchangelogs -O--buildsystem=pybuild -O--test-pytest
+	install -p -m0644 debian/changelog debian/python3-gar/usr/share/doc/python3-gar/changelog
+   dh_python3 -O--buildsystem=pybuild -O--test-pytest
+D: dh_python3 dh_python3:149: version: 2.20151103ubuntu1.2
+D: dh_python3 dh_python3:150: argv: ['/usr/bin/dh_python3', '-O--buildsystem=pybuild', '-O--test-pytest']
+D: dh_python3 dh_python3:151: options: {'no_package': None, 'arch': None, 'suggests': None, 'no_shebang_rewrite': False, 'compile_all': False, 'shebang': None, 'clean_dbg_pkg': True, 'depends': None, 'vrange': None, 'skip_private': False, 'package': None, 'recommends': None, 'guess_deps': True, 'O': '--test-pytest', 'verbose': False, 'no_ext_rename': False, 'regexpr': None, 'requires': None, 'ignore_shebangs': False}
+D: dh_python3 dh_python3:152: args: []
+D: dh_python3 dh_python3:154: supported Python versions: 3.5 (default=3.5)
+D: dh_python3 debhelper:117: source=gar, binary packages=['python3-gar']
+D: dh_python3 dh_python3:171: processing package python3-gar...
+D: dh_python3 fs:47: moving files from debian/python3-gar/usr/lib/python3.5/dist-packages to debian/python3-gar/usr/lib/python3/dist-packages/
+D: dh_python3 fs:249: package python3-gar details = {'nsp.txt': set(), 'compile': True, 'ext_no_version': set(), 'requires.txt': {'debian/python3-gar/usr/lib/python3/dist-packages/gar-0.0.1.egg-info/requires.txt'}, 'ext_vers': set(), 'egg-info': set(), 'shebangs': {/usr/bin/python3}, 'private_dirs': {}, 'public_vers': {Version('3')}}
+D: dh_python3 depends:107: generating dependencies for package python3-gar
+D: dh_python3 pydist:121: trying to find dependency for Click (python=None)
+D: dh_python3 depends:249: D={'python3-click', 'python3:any (>= 3.3.2-2~)', 'python3:any'}; R=[]; S=[]; E=[], B=[]; RT=[]
+   dh_perl -O--buildsystem=pybuild -O--test-pytest
+   dh_link -O--buildsystem=pybuild -O--test-pytest
+   dh_strip_nondeterminism -O--buildsystem=pybuild -O--test-pytest
+   dh_compress -O--buildsystem=pybuild -O--test-pytest
+	cd debian/python3-gar
+	chmod a-x usr/share/doc/python3-gar/changelog
+	gzip -9nf usr/share/doc/python3-gar/changelog
+	cd '/home/travis/build/suvarchal/gar'
+   dh_fixperms -O--buildsystem=pybuild -O--test-pytest
+	find debian/python3-gar -true -print0 2>/dev/null | xargs -0r chown --no-dereference 0:0
+	find debian/python3-gar ! -type l -a -true -a -true -print0 2>/dev/null | xargs -0r chmod go=rX,u+rw,a-s
+	find debian/python3-gar/usr/share/doc -type f -a -true -a ! -regex 'debian/python3-gar/usr/share/doc/[^/]*/examples/.*' -print0 2>/dev/null | xargs -0r chmod 0644
+	find debian/python3-gar/usr/share/doc -type d -a -true -a -true -print0 2>/dev/null | xargs -0r chmod 0755
+	find debian/python3-gar -type f \( -name '*.so.*' -o -name '*.so' -o -name '*.la' -o -name '*.a' -o -name '*.js' -o -name '*.css' -o -name '*.scss' -o -name '*.sass' -o -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' -o -name '*.gif' -o -name '*.cmxs' \) -a -true -a -true -print0 2>/dev/null | xargs -0r chmod 0644
+	find debian/python3-gar/usr/bin -type f -a -true -a -true -print0 2>/dev/null | xargs -0r chmod a+x
+	find debian/python3-gar/usr/lib -type f -name '*.ali' -a -true -a -true -print0 2>/dev/null | xargs -0r chmod uga-w
+   dh_missing -O--buildsystem=pybuild -O--test-pytest
+   dh_installdeb -O--buildsystem=pybuild -O--test-pytest
+	install -d debian/python3-gar/DEBIAN
+	perl -pe "s~#DEBHELPER#~qx{cat debian/python3-gar.postinst.debhelper}~eg" debian/postinst > debian/python3-gar/DEBIAN/postinst
+	chmod 0755 -- debian/python3-gar/DEBIAN/postinst
+	chown 0:0 -- debian/python3-gar/DEBIAN/postinst
+	printf '#!/bin/sh\nset -e\n' > debian/python3-gar/DEBIAN/prerm
+	cat debian/python3-gar.prerm.debhelper >> debian/python3-gar/DEBIAN/prerm
+	chmod 0755 -- debian/python3-gar/DEBIAN/prerm
+	chown 0:0 -- debian/python3-gar/DEBIAN/prerm
+   dh_gencontrol -O--buildsystem=pybuild -O--test-pytest
+	echo misc:Depends= >> debian/python3-gar.substvars
+	echo misc:Pre-Depends= >> debian/python3-gar.substvars
+	dpkg-gencontrol -ppython3-gar -ldebian/changelog -Tdebian/python3-gar.substvars -Pdebian/python3-gar -UMulti-Arch
+dpkg-gencontrol: warning: File::FcntlLock not available; using flock which is not NFS-safe
+	chmod 0644 -- debian/python3-gar/DEBIAN/control
+	chown 0:0 -- debian/python3-gar/DEBIAN/control
+   dh_md5sums -O--buildsystem=pybuild -O--test-pytest
+	(cd debian/python3-gar >/dev/null ; find . -type f  ! -regex './DEBIAN/.*' -printf '%P\0' | LC_ALL=C sort -z | xargs -r0 md5sum | perl -pe 'if (s@^\\@@) { s/\\\\/\\/g; }' > DEBIAN/md5sums) >/dev/null
+	chmod 0644 -- debian/python3-gar/DEBIAN/md5sums
+	chown 0:0 -- debian/python3-gar/DEBIAN/md5sums
+   dh_builddeb -O--buildsystem=pybuild -O--test-pytest
+	dpkg-deb --build debian/python3-gar ..
+dpkg-deb: building package 'python3-gar' in '../python3-gar_0.0.1_all.deb'.
+ dpkg-genchanges  >../gar_0.0.1_amd64.changes
+dpkg-genchanges: including full source code in upload
+ dpkg-source -I -i --after-build gar
+dpkg-buildpackage: full upload; Debian-native package (full source is included)

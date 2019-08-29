@@ -1,0 +1,28 @@
+Format: 1.8
+Date: Mon, 19 Aug 2019 22:14:30 +0200
+Source: gar
+Binary: python3-gar
+Architecture: source all
+Version: 0.0.1
+Distribution: stable
+Urgency: medium
+Maintainer: Suvarchal K. Cheedela <suvarchal.kumar@gmail.com>
+Changed-By: Suvarchal K. Cheedela <suvarchal.kumar@gmail.com>
+Description:
+ python3-gar - Group archiving tool
+Changes:
+ gar (0.0.1) stable; urgency=medium
+ .
+   * upstream release
+Checksums-Sha1:
+ 1658a6b9e10226b5e5ff51fe6e65eef8c3ffd1ff 572 gar_0.0.1.dsc
+ 09b275f50129279ec4760db41dc892ace6224a5e 5760 gar_0.0.1.tar.xz
+ ced8a870cb267ca77ecf2698a096408e22e277cd 5328 python3-gar_0.0.1_all.deb
+Checksums-Sha256:
+ e0d1f9878217ac8c977fcef1754af4d390a53bc5b36ba7819f98f19df76a8359 572 gar_0.0.1.dsc
+ 2ff425a97febb11d2033d1bb201696c680e98dfc83d0e2d014a4c7517fd75a17 5760 gar_0.0.1.tar.xz
+ 8152f4bb267a1f80022108af0f50541b18714b4bb53193232e74de294dbc4f15 5328 python3-gar_0.0.1_all.deb
+Files:
+ b3a93d411a99a59c0e9be602a4176248 572 python optional gar_0.0.1.dsc
+ 05d2c2132e367a80a309e290d65b5746 5760 python optional gar_0.0.1.tar.xz
+ 6be7afc2b61acaa94074ba89ea74155b 5328 python optional python3-gar_0.0.1_all.deb
