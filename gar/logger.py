@@ -5,29 +5,21 @@ import gzip
 from pathlib import Path
 
 
-__syslogpath = Path("/var/log/gar")
+syslogpath = Path("/var/log/gar")
 
-logger = logging.getLogger("gar")
+logger = logging.getLogger("logging")
 
 try:
-    if __syslogpath.exists() and os.access(__syslogpath, os.W_OK):
-        __logfilepath = __syslogpath
+    if syslogpath.exists() and os.access(syslogpath, os.W_OK):
+        logfilepath = syslogpath
     else:
-        __logfilepath = Path("~").expanduser() / ".gar"
-        __logfilepath.mkdir(exist_ok=True)
+        logfilepath = Path.home() / ".gar"
+        logfilepath.mkdir(exist_ok=True)
 
 except (OSError, PermissionError):
     logger.critical("Logging disabled: gar cannot create logs.\
                      Run gar as adm group\
                      or see if ~/.gar has write permissions")
-
-
-fh = handlers.TimedRotatingFileHandler((__logfilepath / "gar.log"),
-                                       when="s", backupCount=10, delay=True)
-formatter = logging.Formatter(' %(asctime)-12s - %(name)-5s \
-                              - %(levelname)-6s - %(message)s')
-fh.setFormatter(formatter)
-
 
 def rotator(src, dst):
     os.rename(src, dst)
@@ -36,12 +28,14 @@ def rotator(src, dst):
             zf.writelines(f)
     os.remove(dst)
 
+def setup_logger(name="gar.log"):
+    fh = handlers.TimedRotatingFileHandler((logfilepath / name),
+                                       when="s", backupCount=10, delay=True)
+    formatter = logging.Formatter(' %(asctime)-12s - %(name)-5s \
+                                  - %(levelname)-6s - %(message)s')
+    fh.setFormatter(formatter)
 
-fh.rotator = rotator
+    fh.rotator = rotator
 
-logger.addHandler(fh)
-# import time
-# time.sleep(10)
-# for i in range(1000):
-#     time.sleep(0.01)
-#     logger.warning("help") # default is warning level
+    logger.addHandler(fh)
+    return fh
