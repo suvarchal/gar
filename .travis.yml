@@ -32,6 +32,7 @@ script:
 after_success:
  - coveralls 
 deploy:
+ tags: true
  provider: pages
  skip_cleanup: true
  local_dir: ./upload
