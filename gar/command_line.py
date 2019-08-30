@@ -45,10 +45,8 @@ def isvalidgroup(group):
     return group
 
 
-__epilog = """Examples:
-gar copy
-gar copy groupname /path/to/src /path/to/dest
-"""
+__epilog = "Examples:\n"\
+           "\tgar copy groupname /path/to/src /path/to/dest"
 __shorthelp = "Copy files and directories for a group"
 
 
