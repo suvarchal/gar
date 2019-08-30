@@ -2,7 +2,6 @@ sudo: true
 language: python
 python:
  - '3.6'
- - '3.7'
 before_install:
  - sudo add-apt-repository ppa:jonathonf/debhelper-11 -y
  - sudo apt-get update -q
