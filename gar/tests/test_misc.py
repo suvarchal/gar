@@ -1,7 +1,8 @@
 from pathlib import Path
+import pytest
 from gar import lock
 
-# test lock functions
+# test lock functions   
 @pytest.fixture
 def templock():
     templock = lock.lockpath / "gartest.lock"
