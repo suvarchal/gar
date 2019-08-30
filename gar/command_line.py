@@ -22,8 +22,8 @@ class Cli(object):
             self.logger.setLevel(logging.DEBUG)
 
     @staticmethod
-    def Lock(self, group):
-        return SimpleFileLock(f"gar.{group}.lock")
+    def Lock(group):
+        yield from SimpleFileLock(f"gar.{group}.lock")
 
 
 pass_cli = click.make_pass_decorator(Cli, ensure=True)
