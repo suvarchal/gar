@@ -17,9 +17,13 @@ class Cli(object):
         fh = setup_logger()
         self.logger.addHandler(fh)
 
-    def setLevel(self, debug):
+    def setDegug(self, debug):
         if debug:
             self.logger.setLevel(logging.DEBUG)
+
+    @staticmethod
+    def Lock(self, group):
+        return SimpleFileLock(f"gar.{group}.lock")
 
 
 pass_cli = click.make_pass_decorator(Cli, ensure=True)
@@ -56,4 +60,5 @@ def cli_copy(cli, src, dst, debug):
     """
     cli.setLevel(debug) if not debug == cli.debug else None
     click.echo("{src}:{dst} debug{debug}".format(src=src, dst=dst))
-    copy(src, dst)
+    with cli.Lock("temp"):
+        copy(src, dst)

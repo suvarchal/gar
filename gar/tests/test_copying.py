@@ -28,4 +28,4 @@ class TestCopy:
 #@pytest.mark.slow
 #def test_none():
 #    print("hello")
-#    assert 0
+     assert 0
