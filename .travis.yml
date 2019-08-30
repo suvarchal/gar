@@ -16,6 +16,7 @@ before_install:
  - travis_retry pip install python-coveralls
  - travis_retry pip install click
  - travis_retry pip install tox
+ - pip install -e .
 script:
  - tox
  - sudo apt-cache policy debhelper
@@ -28,7 +29,7 @@ script:
  - ls upload/dist/
  - sudo apt-get install `ls ./upload/dist/python3-gar_*.deb` -y
  - gar --help
- - pytest
+ - pytest --cov-report term-missing --cov=gar
 after_success:
  - coveralls 
 deploy:
