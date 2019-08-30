@@ -37,6 +37,14 @@ def cli(ctx, debug):
     ctx.obj = Cli(debug=debug)
 
 
+def isvalidgroup(group):
+    import grp
+    groups = [g.gr_name for g in grp.getgrall()]
+    if group not in groups:
+        raise click.ClickException(f"Group '{group}' doesn't exist?")
+    return group
+
+
 __epilog = """Examples:
 gar copy
 gar copy groupname /path/to/src /path/to/dest
