@@ -21,12 +21,14 @@ except (OSError, PermissionError):
                      Run gar as adm group\
                      or see if ~/.gar has write permissions")
 
+
 def rotator(src, dst):
     os.rename(src, dst)
     with open(dst, 'rb') as f:
         with gzip.open(f'{dst}.gz', mode="wb") as zf:
             zf.writelines(f)
     os.remove(dst)
+
 
 def setup_logger(name="gar.log"):
     fh = handlers.TimedRotatingFileHandler((logfilepath / name),

@@ -1,8 +1,22 @@
 from pathlib import Path
 import pytest
+from gar import utils
 from gar import lock
 
-# test lock functions   
+
+# test group utils
+def test_gid_utils(tempf):
+    tfile_gid = tempf.stat().st_gid
+    assert utils.getgid(tfile_gid) == tfile_gid
+
+    # hr_fstat = utils.hr_filestat(tempf)
+    # assert utils.getgid(hr_fstat['Group']) == tfile_gid
+
+    gm = utils.group_members("root")
+    assert "root" in gm
+
+
+# test lock functions
 @pytest.fixture
 def templock():
     templock = lock.lockpath / "gartest.lock"
