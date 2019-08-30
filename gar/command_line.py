@@ -4,6 +4,7 @@ import logging
 import click
 from .core import copy
 from .logger import setup_logger
+from .lock import SimpleFileLock
 
 
 class Cli(object):
