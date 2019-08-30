@@ -13,6 +13,7 @@ before_install:
  - sudo apt-get install python3-all -y
  - sudo apt-get install python3-setuptools -y
  - sudo apt-get install python3-pytest -y
+ - travis_retry pip install pytest-cov
  - travis_retry pip install python-coveralls
  - travis_retry pip install click
  - travis_retry pip install tox
