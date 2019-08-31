@@ -1,7 +1,21 @@
 from pathlib import Path
+import tempfile
 import pytest
 from gar import utils
 from gar import lock
+
+
+# Fixture: Create a temp file
+@pytest.fixture
+def tempf():
+    """ Create a tempfile write 5 bytes
+    """
+    _, tempf = tempfile.mkstemp()
+    tempf = Path(tempf)
+    # make a temp file with 5 bytes
+    tempf.write_bytes(b"tempo")
+    yield tempf
+    tempf.unlink() if tempf.exists() else None
 
 
 # test group utils

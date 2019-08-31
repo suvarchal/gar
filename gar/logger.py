@@ -31,8 +31,10 @@ def rotator(src, dst):
 
 
 def setup_logger(name="gar.log"):
-    fh = handlers.TimedRotatingFileHandler((logfilepath / name),
-                                       when="s", backupCount=10, delay=True)
+    fh = handlers.TimedRotatingFileHandler(
+        
+                                          (logfilepath / name),
+                                          when="s", backupCount=10, delay=True)
     formatter = logging.Formatter(' %(asctime)-12s - %(name)-5s \
                                   - %(levelname)-6s - %(message)s')
     fh.setFormatter(formatter)
