@@ -18,7 +18,7 @@ before_install:
  - travis_retry pip install tox
  - pip install -e .
 script:
- - tox
+ #- tox
  - sudo apt-cache policy debhelper
  - debuild -us -uc -I -i
  - ls ../gar_*
