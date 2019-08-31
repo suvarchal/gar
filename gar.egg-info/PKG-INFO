@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: gar
+Version: 0.0.1
+Summary: Archiving for users and groups
+Home-page: https://github.com/suvarchal/gar
+Author: Suvarchal K. Cheedela
+Author-email: suvarchal.kumar@gmail.com
+License: UNKNOWN
+Description: .. image:: https://travis-ci.org/suvarchal/gar.svg?branch=master
+            :target: https://travis-ci.org/suvarchal/gar
+        
+        .. image:: https://coveralls.io/repos/github/suvarchal/gar/badge.svg?branch=master
+            :target: https://coveralls.io/github/suvarchal/gar?branch=master
+        An archiving tool for users and groups
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT
+Classifier: Operating System :: Linux
+Requires-Python: >=3.3
+Description-Content-Type: text/x-rst
