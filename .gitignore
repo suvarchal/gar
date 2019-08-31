@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .tox/
+gar.egg-info/
 env/
 build/
 dist/
