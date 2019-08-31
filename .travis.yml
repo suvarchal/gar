@@ -22,28 +22,31 @@ script:
  - sudo apt-cache policy debhelper
  - debuild -us -uc -I -i
  - ls ../gar_*
- - mkdir -p upload/dist
- - mv ../gar_* upload/dist/
- - mv ../python3-gar_* upload/dist/
- - ls upload/
- - ls upload/dist/
- - sudo apt-get install `ls ./upload/dist/python3-gar_*.deb` -y
+ # - mkdir -p upload/dist
+ # - mv ../gar_* upload/dist/
+ #- mv ../python3-gar_* upload/dist/
+ # - ls upload/
+ # - ls upload/dist/
+ #- sudo apt-get install `ls ./upload/dist/python3-gar_*.deb` -y
  - gar --help
  - pytest --cov-report term-missing --cov=gar
+ - echo $(TRAVIS_TAG)
 after_success:
  - coveralls 
 deploy:
- tags: true
- provider: pages
+ #tags: true
+ provider: releases
  skip_cleanup: true
- local_dir: ./upload
+ file: ../gar_0.0.1.tar.xz
+ file: ../python3-gar_0.0.1_all.deb
+ draft: True 
  github_token: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com
  committer-from-gh: true
- target_branch: gh-pages
- on:
-   tags: true
+
+ #on:
+ #  tags: true
 
 notifications:
   email: false
