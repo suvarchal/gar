@@ -30,7 +30,6 @@ script:
  #- sudo apt-get install `ls ./upload/dist/python3-gar_*.deb` -y
  - gar --help
  - pytest --cov-report term-missing --cov=gar
- - echo $(TRAVIS_TAG)
 after_success:
  - coveralls 
 deploy:
