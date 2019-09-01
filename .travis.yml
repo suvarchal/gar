@@ -2,6 +2,8 @@ sudo: true
 language: python
 python:
  - '3.6'
+services:
+  - docker
 before_install:
  - sudo add-apt-repository ppa:jonathonf/debhelper-11 -y
  - sudo apt-get update -q
@@ -19,7 +21,7 @@ before_install:
  - pip install -e .
 script:
  #- tox
-# - sudo apt-cache policy debhelper
+ - docker run debian:jessie
  - debuild -us -uc -I -i
  - ls ../gar_*
  # - mkdir -p upload/dist
