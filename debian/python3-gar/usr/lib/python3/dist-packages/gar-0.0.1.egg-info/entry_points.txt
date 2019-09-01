@@ -1,4 +1,0 @@
-
-        [console_scripts]
-        gar=gar.command_line:cli_copy
-    
