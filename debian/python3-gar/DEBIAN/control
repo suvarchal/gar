@@ -1,0 +1,10 @@
+Package: python3-gar
+Source: gar
+Version: 0.0.1
+Architecture: all
+Maintainer: Suvarchal K. Cheedela <suvarchal.kumar@gmail.com>
+Installed-Size: 34
+Depends: python3-click, python3:any
+Section: python
+Priority: optional
+Description: Group archiving tool
