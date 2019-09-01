@@ -38,8 +38,8 @@ deploy:
  skip_cleanup: true
  file: ../gar_0.0.1.tar.xz
  file: ../python3-gar_0.0.1_all.deb
- draft: True 
- github_api: $GITHUB_TOKEN
+ draft: true 
+ api_key: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com
  committer-from-gh: true
