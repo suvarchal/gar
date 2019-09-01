@@ -28,7 +28,7 @@ script:
  #- tox
  - docker run debian:jessie
 # - debuild -us -uc -I -i
- - ls ../gar_*
+# - ls ../gar_*
  # - mkdir -p upload/dist
  # - mv ../gar_* upload/dist/
  #- mv ../python3-gar_* upload/dist/
