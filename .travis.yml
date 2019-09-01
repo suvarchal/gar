@@ -34,11 +34,12 @@ script:
  - pytest --cov-report term-missing --cov=gar
 after_success:
  - coveralls
- -|
-  if [[ $TRAVIS_TAG ]]; then 
-  echo "tagged" 
-  echo $TRAVIS_TAG
-  fi
+ - |
+   if [[ $TRAVIS_TAG ]]; then 
+   echo "tagged" 
+   echo $TRAVIS_TAG
+   fi
+
 deploy:
  #tags: true
  provider: releases
