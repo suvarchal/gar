@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/x-rst",
     url="https://github.com/suvarchal/gar",
     packages=setuptools.find_packages(),
-    python_requires='>=3.3',
+    python_requires='>=3.6',
     install_requires=[
         'Click',
     ],
