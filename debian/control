@@ -5,7 +5,7 @@ Priority: optional
 Build-Depends: 
  debhelper (>= 11~), 
  dh-python,
- python3 (> 3.5~), 
+ python3 (>= 3.6~), 
  python3-setuptools,
  python3-pytest,
 Standards-Version: 4.3.0
