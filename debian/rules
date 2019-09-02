@@ -1,10 +1,8 @@
 #!/usr/bin/make -f
 export DH_VERBOSE=1
 export PYBUILD_NAME=gar
-#export PYBUILD_TEST_ARGS=--test-pytest
-#export PYBUILD_TEST_ARGS={dir}/tests
+export PYBUILD_TEST_PYTEST=1 # or override below
 override_dh_auto_test:
-	#python3 -m pytest 
-
+	dh_auto_test -- --test-pytest
 %:
-	dh $@ --with python3 --buildsystem=pybuild --test-pytest 
+	dh $@ --with python3 --buildsystem=pybuild  

@@ -2,4 +2,5 @@ tar-ignore="ci"
 tar-ignore="env"
 tar-ignore=".tox"
 tar-ignore=".pybuild"
-
+tar-ignore=".travis.yml"
+tar-ignore="tox.ini"
