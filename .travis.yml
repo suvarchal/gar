@@ -46,13 +46,15 @@ after_success:
    echo ${TRAVIS_TAG#"v"}
    fi
  - ls ../*
+before_deploy:
+ - export DTAG=`echo ${TRAVIS_TAG#"v"}`
 deploy:
  #tags: true
  provider: releases
  skip_cleanup: true
  file: 
-    - ../gar_${TRAVIS_TAG#"v"}.xz
-    - ../python3-gar_${TRAVIS_TAG#"v"}_all.deb
+    - ../gar_${DTAG}.xz
+    - ../python3-gar_${DTAG}_all.deb
  draft: true 
  api_key: $GITHUB_TOKEN
  name: suvarchal
