@@ -53,7 +53,7 @@ deploy:
  provider: releases
  skip_cleanup: true
  file: 
-    - ../gar_${DTAG}.xz
+    - ../gar_${DTAG}.tar.xz
     - ../python3-gar_${DTAG}_all.deb
  draft: true 
  api_key: $GITHUB_TOKEN
