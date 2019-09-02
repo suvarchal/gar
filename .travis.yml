@@ -50,16 +50,15 @@ deploy:
  provider: releases
  skip_cleanup: true
  file: 
-    - ../gar_0.0.1.tar.xz
-    - ../python3-gar_0.0.1_all.deb
+    - ../gar_${TRAVIS_TAG#"v"}.xz
+    - ../python3-gar_${TRAVIS_TAG#"v"}_all.deb
  draft: true 
  api_key: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com
  committer-from-gh: true
-
- #on:
- #  tags: true
+ on:
+   tags: true
 
 notifications:
   email: false
