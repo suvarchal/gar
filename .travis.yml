@@ -43,8 +43,9 @@ after_success:
    if [[ $TRAVIS_TAG ]]; then 
    echo "tagged" 
    echo $TRAVIS_TAG
+   echo ${TRAVIS_TAG#"v"}
    fi
-
+ - ls ../*
 deploy:
  #tags: true
  provider: releases
