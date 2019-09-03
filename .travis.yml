@@ -11,6 +11,7 @@ before_install:
  - |
    if [[ $TRAVIS_TAG ]]; then
    sh ci/build_debian.sh
+   sh ci/test_debian.sh
    fi
 # - sudo apt-get install fakeroot -y 
 # - sudo apt-get install debhelper -y
