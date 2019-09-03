@@ -16,3 +16,4 @@ dch --package "gar" --create -v ${TRAVIS_TAG#"v"} -D stable "upstream release"
 
 # build source and binary
 debuild -us -uc -I -i
+

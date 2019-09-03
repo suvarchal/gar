@@ -11,6 +11,7 @@ Build-Depends:
 Standards-Version: 4.3.0
 
 Package: python3-gar
+X-Python3-Version: >= 3.6
 Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends}, python3-click
 Description: Group archiving tool
