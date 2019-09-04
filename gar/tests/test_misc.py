@@ -150,9 +150,10 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     print("*"*100)
     k1 = list(h1.keys())
     k2 = list(h2.keys())
-    print(k1[1], utils.hash_cp_stat(k1[1]), sep=" : ")
-    print(k2[1], utils.hash_cp_stat(k2[1]), sep=" : ")
-    print(utils.cp_stat(k1[1]), utils.cp_stat(k2[1]), sep=' : ')
+    for k1,k2 in zip(h1.keys(),h2.keys()):
+        print(k1, utils.hash_cp_stat(k1), sep=" : ")
+        print(k2, utils.hash_cp_stat(k2), sep=" : ")
+        print(utils.cp_stat(k1), utils.cp_stat(k2), sep=' : ')
     h1sum = reduce(lambda x, y: x ^ y, h1.values())
 
     h2sum = reduce(lambda x, y: x ^ y, h2.values())
