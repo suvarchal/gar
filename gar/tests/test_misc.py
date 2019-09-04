@@ -15,12 +15,23 @@ def test_gid_utils(tempf):
     tfile_gid = tempf.stat().st_gid
     assert utils.getgid(tfile_gid) == tfile_gid
 
-    # hr_fstat = utils.hr_filestat(tempf)
-    # assert utils.getgid(hr_fstat['Group']) == tfile_gid
+    hr_fstat = utils.hr_filestat(tempf)
+    assert utils.getgid(hr_fstat['Group']) == tfile_gid
 
     gm = utils.group_members("root")
     assert "root" in gm
 
+    temp, utils.passwdfi = utils.passwdfi, None
+    gm = utils.group_members(hr_fstat['Group'])
+    utils.passwdfi = temp
+    # nothing for now
+
+    # test passing owner and group as strings
+    assert utils.user_in_group(hr_fstat['Owner'], hr_fstat['Group'])
+    # test passing ints
+    assert utils.user_in_group(tempf.stat().st_uid, tempf.stat().st_gid)
+    
+   
 
 # test lock functions
 @pytest.fixture
@@ -110,7 +121,7 @@ def test_symlink(tempsym):
     assert lstat == lstat2
 
 
-def temp_hash_utils(tempf, tempsym, tempdirwithfiles):
+def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     """ Check if hashing functions work
     as intended, very important for
     verifying integrity of copy/move

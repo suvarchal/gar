@@ -8,7 +8,7 @@ from pathlib import Path
 from collections import OrderedDict
 
 passwdfi = Path("/etc/passwd")
-passwdfi = passwdfi if passwdfi.exists() and os.access(passwdfi,os.R_OK) else None
+passwdfi = passwdfi if passwdfi.exists() and os.access(passwdfi, os.R_OK) else None
 
 
 def getgid(group):
@@ -38,7 +38,7 @@ def group_members(group):
             if ul[3] == str(gid):
                 gm.append(ul[0])
     else:
-        gm = grp.getgrgid(group).gr_mem
+        gm = grp.getgrgid(gid).gr_mem
     return gm
 
 def cp_dirstat(dirpath):
@@ -168,7 +168,7 @@ def user_in_group(user, group):
     # handles if group is id
     if type(group) == int:
         group = grp.getgrgid(group).gr_name
-        
+
     return user in group_members(group)
 
 
