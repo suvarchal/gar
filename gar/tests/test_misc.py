@@ -52,3 +52,22 @@ def test_lock_filelock(templock):
         with pytest.raises(OSError):
             fl = lock.FileLock(templock)
             fl.__enter__()
+
+# Test logging functions
+@pytest.fixture
+def temp_log():
+    log_src = Path("gartemplog")
+    log_src.write_text("log")
+    log_dst = Path(f"{log_src.name}.gz")
+    yield log_src, log_dst
+    log_src.unlink() if log_src.exists() else None
+    log_dst.unlink() if log_dst.exists() else None
+
+
+def test_logger_rotator(temp_log):
+    # second argument file will be appended by .gz internally
+    rotator(temp_log[0], temp_log[0])
+    assert not temp_log[0].exists()
+    assert temp_log[1].exists()
+
+
