@@ -3,6 +3,7 @@ __pycache__/
 .pybuild/
 *$py.class
 .tox/
+.coverage
 gar.egg-info/
 env/
 build/
