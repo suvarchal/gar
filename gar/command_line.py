@@ -1,10 +1,12 @@
 import sys
 import os
 import logging
+from pathlib import Path
 import click
 from .core import copy
-from .logger import setup_logger
+from .logger import setup_logger, logfilepath
 from .lock import SimpleFileLock
+from .utils import getgid
 
 
 class Cli(object):
@@ -42,15 +44,16 @@ def isvalidgroup(group):
     return group
 
 
-__epilog = "Examples:\n"\
+__epilog = "Examples:\n\n"\
            "gar copy groupname /path/to/src /path/to/dest"
 __shorthelp = "Copy files and directories for a group"
 
 
 @cli.command(name='copy', short_help=__shorthelp,
              epilog=__epilog)
-@click.argument("src")
-@click.argument("dst")
+@click.argument("group", type=isvalidgroup)
+@click.argument("src", type=click.Path(exists=True))
+@click.argument("dst", type=click.Path(exists=True))
 @click.option("--debug/-d", is_flag=True, show_default=True, default=False)
 @pass_cli
 def cli_copy(cli, src, dst, debug):
@@ -60,10 +63,18 @@ def cli_copy(cli, src, dst, debug):
     directories.
 
     """
+    if Path(src).resolve() == Path(dst).resolve():
+        raise click.ClickException(f"src: {src} and dst: {dst} are same?")
+
     cli.setLevel(debug) if not debug == cli.debug else None
-    click.echo("{src}:{dst} debug{debug}".format(src=src, dst=dst))
-    with SimpleFileLock("temp"):
+    lockfile = f"gar.{getgid(group)}.lock"
+    #if (lockpath / lockfile).exists():
+    #    raise click.ClickException("Another process for group: {group} running?")
+    # ensure lock file doesn't exist.
+    with SimpleFileLock(lockfile):
         copy(src, dst)
+    click.echo("See log file for errors {logfilepath/'gar.log'}")
+
 
 if __name__ == "__main__":
     cli()

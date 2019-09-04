@@ -1,5 +1,6 @@
 from pathlib import Path
 import shutil
+from shutil import SameFileError, SpecialFileError
 import os
 
 
@@ -23,18 +24,21 @@ def lset_owner_mode_xattr(src, dst):
     shutil._copyxattr(src, dst, follow_symlinks=False)
 
 
-def copy(src, dst, **kwargs):
+def copy(src, dst, ignore=None, logger=None, **kwargs):
     """
     Copies from files and directories from
     `source` to `destination` retaining directory
-    structure and filepermissions
+    structure and file permissions and ownership
 
     Returns None
     """
+    if logger:
+        logger.__setattr__("name", "copy")
     src = Path(src)
     dst = Path(dst)
     if not dst.exists():
         os.makedirs(dst)
+        # try block?
         set_owner_mode_xattr(src, dst)
 
     # a trick to send original src information to
@@ -43,15 +47,19 @@ def copy(src, dst, **kwargs):
         kwargs['scope'] = str(src)
 
     # enquiring file stat on DirEntry of scandir is
-    # siginiffaster then using scr.iterdir()
+    # siginicantly faster then using scr.iterdir()
+    # or os.walk()
     for fi in os.scandir(src):
         # is destination writable?
         # is contains enough space?
         # filter for files and group
+        if ignore is not None:
+            if ignore(fi):
+                continue
+        
         fi_dst = dst / fi.name
         try:
             if fi.is_symlink():
-                # print(fi,fi_dst)
                 # to check if the link in scope of original src
                 commonpath = os.path.commonpath([os.path.realpath(fi),
                                                  src.absolute()])
@@ -62,34 +70,34 @@ def copy(src, dst, **kwargs):
                     os.symlink(newrelpath, fi_dst)
                     # permissions of source file are retained.
                     lset_owner_mode_xattr(fi, fi_dst)
+            
                 # file outside scope of original src
                 else:
-                    # copies the file or dir
-                    # if dir? will fail when not sudo/root
-                    # because permissions need to be changed
-                    if fi.is_dir():
-                        print("Link SRC directory")
-                        print(fi, fi.stat(), sep=':')
-                        copy(fi, fi_dst)
-                        set_owner_mode_xattr(fi, fi_dst)
-                        print('new link dir')
-                        print(fi_dst, fi_dst.stat(), sep=":")
-                        print("*"*100)
-                    else:
-                        shutil.copy(fi, fi_dst)
-                        lset_owner_mode_xattr(fi, fi_dst)
+                    # maintain the out-of-scope symlink
+                    shutil.copy(fi, fi_dst, follow_symlinks=False)
+                    lset_owner_mode_xattr(fi, fi_dst)
             elif fi.is_dir():
+                # reccursive call to copy
                 copy(fi, fi_dst)
                 set_owner_mode_xattr(fi, fi_dst)
-            # for all other files, and might raise OSError
+            # all files
             # if file type is not supported for coping
-            # sym links too if not treated properly above
+            # raises error
             else:
-                if fi.is_dir():
-                    copy(fi, fi_dst)
-                    continue
                 shutil.copy(fi, fi_dst, follow_symlinks=False)
                 set_owner_mode_xattr(fi, fi_dst)
-        except Exception as ex:
-            print(src, dst, ex, sep=":")
-#    shutil.copytree(src, dst, ignore=ignore_me)
+
+        except (SameFileError, SpecialFileError) as ex:
+            logger.warn(f"Skipping: {ex.filename}")
+
+        except (OSError, PermissionError) as ex:
+            msg = "Do you have enough permissions to change file ownership?\n"\
+                  "Run as privilaged user or see `gar --help` for options."
+            logger.error(f"{fi.path} to {fi_dst} {ex} \n{msg} ")
+
+        except IOError as ex:
+            if logger:
+                logger.critical(ex)
+            else:
+                print(ex)
+
