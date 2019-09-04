@@ -6,36 +6,19 @@ python:
 services:
   - docker
 before_install:
- #- sudo add-apt-repository ppa:jonathonf/debhelper-11 -y
  - sudo apt-get update -q
  - |
    if [[ $TRAVIS_TAG ]]; then
    sh ci/build_debian.sh
    sh ci/test_debian.sh
    fi
-# - sudo apt-get install fakeroot -y 
-# - sudo apt-get install debhelper -y
-# - sudo apt-get install dh-python -y
-# - sudo apt-get install devscripts -y
-# - sudo apt-get install python3-all -y
-# - sudo apt-get install python3-setuptools -y
-# - sudo apt-get install python3-pytest -y
  - travis_retry pip install pytest-cov
  - travis_retry pip install python-coveralls
  - travis_retry pip install click
  - travis_retry pip install tox
  - pip install -e .
 script:
- #- tox
- - docker run debian:jessie
-# - debuild -us -uc -I -i
-# - ls ../gar_*
- # - mkdir -p upload/dist
- # - mv ../gar_* upload/dist/
- #- mv ../python3-gar_* upload/dist/
- # - ls upload/
- # - ls upload/dist/
- #- sudo apt-get install `ls ./upload/dist/python3-gar_*.deb` -y
+ - tox
  - gar --help
  - pytest --cov-report term-missing --cov=gar
 after_success:
@@ -56,7 +39,7 @@ deploy:
  file: 
     - ../gar_${DTAG}.tar.xz
     - ../python3-gar_${DTAG}_all.deb
- draft: true 
+ #draft: true 
  api_key: $GITHUB_TOKEN
  name: suvarchal
  email: suvarchal.kumar@gmail.com

@@ -5,7 +5,7 @@ with open('README.rst', 'rt') as fh:
 
 setuptools.setup(
     name="gar",
-    version="0.0.1",
+    version="0.0.14",
     author="Suvarchal K. Cheedela",
     author_email="suvarchal.kumar@gmail.com",
     description="Archiving for users and groups",
@@ -19,7 +19,7 @@ setuptools.setup(
     ],
     entry_points='''
         [console_scripts]
-        gar=gar.command_line:cli_copy
+        gar=gar.command_line:cli
     ''',
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -43,12 +43,11 @@ def isvalidgroup(group):
 
 
 __epilog = "Examples:\n"\
-           "\tgar copy groupname /path/to/src /path/to/dest"
+           "gar copy groupname /path/to/src /path/to/dest"
 __shorthelp = "Copy files and directories for a group"
 
 
-@cli.command(name='copy', help="copy help",
-             short_help=__shorthelp,
+@cli.command(name='copy', short_help=__shorthelp,
              epilog=__epilog)
 @click.argument("src")
 @click.argument("dst")
@@ -65,3 +64,6 @@ def cli_copy(cli, src, dst, debug):
     click.echo("{src}:{dst} debug{debug}".format(src=src, dst=dst))
     with SimpleFileLock("temp"):
         copy(src, dst)
+
+if __name__ == "__main__":
+    cli()

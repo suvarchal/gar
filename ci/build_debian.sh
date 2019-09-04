@@ -1,4 +1,6 @@
 # install dependencies
+# below lines for ubuntu 16.04
+#sudo add-apt-repository ppa:jonathonf/debhelper-11 -y
 #sudo apt-get update -q
 sudo apt-get install fakeroot -y 
 sudo apt-get install debhelper -y
