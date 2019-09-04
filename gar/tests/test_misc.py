@@ -127,7 +127,7 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     verifying integrity of copy/move
     """
 
-    # copy file and check
+    # copy file and check hash
     tempfcopy = tempf.name
     shutil.copy2(tempf, tempfcopy)
     h1 = utils.hash_cp_stat(tempf)
@@ -145,7 +145,8 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
 
     shutil.copytree(tempdirwithfiles[0], tempdcopy, symlinks=True)
     h2 = utils.hash_walk(tempdcopy)
-    
+    print(h1)
+    print(h2)   
     h1sum = reduce(lambda x, y: x ^ y, h1.values())
 
     h2sum = reduce(lambda x, y: x ^ y, h2.values())

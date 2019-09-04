@@ -80,7 +80,7 @@ def setup(request):
         print('teardown the setup')
     request.addfinalizer(teardown)
 
-    def create_groups_users():
+    def create_users():
         """ Create 5 users and x groups """
         groups = ["group1","group2"]
         users  = {"user1":["group1"],"user2":["group1","group2"],"user3":["group2"]}
