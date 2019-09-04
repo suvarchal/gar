@@ -69,7 +69,7 @@ def setup(request):
 
     def func2():
         print("func2")
-        create_dirs(2)
+        #create_dirs(2)
     try:
         if os.environ['CI']:
             func1()
@@ -87,4 +87,4 @@ def setup(request):
         for g in groups:
             os.system("add group ".format(g))
         for u,g in users.items():
-            "useradd -r -m -G {} {}".format(" ".join(v),k)
+            "useradd -r -m -G {} {}".format(" ".join(u),g)
