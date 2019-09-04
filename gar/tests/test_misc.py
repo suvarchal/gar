@@ -150,12 +150,13 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     print("*"*100)
     k1 = list(h1.keys())
     k2 = list(h2.keys())
-    print(k1[1])
-    print(k2[1])
+    print(k1[1], utils.hash_cp_stat(k1[1]), sep=" : ")
+    print(k2[1], utils.hash_cp_stat(k2[1]), sep=" : ")
     print(utils.cp_stat(k1[1]), utils.cp_stat(k2[1]), sep=' : ')
     h1sum = reduce(lambda x, y: x ^ y, h1.values())
 
     h2sum = reduce(lambda x, y: x ^ y, h2.values())
+    print(h1sum, h2sum, sep=" : ")
     assert 0 #h1sum == h2sum
 
     shutil.rmtree(tempdcopy)

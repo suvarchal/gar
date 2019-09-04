@@ -6,6 +6,8 @@ docker build --build-arg TAG=${TAG} --tag=buster . --target=buster
 
 docker build --build-arg TAG=${TAG} --tag=bullseye . --target=bullseye 
 
+# not necessary on travis
+if [[ ! ${CI} ]]; then
 docker build --build-arg TAG=${TAG} --tag=bionic . --target=bionic
-
+fi
 cd $cwd
