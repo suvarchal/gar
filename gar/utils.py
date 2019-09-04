@@ -1,7 +1,11 @@
 import os
 import grp
 import pwd
+import time
+import json
+import time
 from pathlib import Path
+from collections import OrderedDict
 
 passwdfi = Path("/etc/passwd")
 passwdfi = passwdfi if passwdfi.exists() and os.access(passwdfi,os.R_OK) else None
@@ -126,6 +130,32 @@ def hr_filestat(filepath):
              'Accessed': time.ctime(fstat.st_atime)}
     return OrderedDict(finfo)
 
+def hash_walk(fdpath, follow_symlinks=False, ignore=None):
+    """ Returns hash for entire directory tree using default hash.
+        function only scans for files, directories and symlinks:
+        special files are ignored by the has function
+        
+    """
+    files_hash = OrderedDict()
+    # use walk and sorted to ensure the listing order is same every run
+    # files without read permissions will be ignored
+    for root, dirs, files in os.walk(fdpath):
+        root = Path(root)
+        # functions called ignore all other kinds of files (eg.., device files)
+        # add ignored clause? 
+        for fi in sorted(files):
+            fi = root / fi
+            if fi.is_symlink():
+                files_hash.update({fi: hash_cp_stat(fi)})
+            else:
+                files_hash.update({fi: hash_cp_stat(fi)})
+        for d in sorted(dirs):
+            d = root / d
+            if d.is_symlink():
+                files_hash.update({d: hash_cp_stat(d)})
+            else:
+                files_hash.update({d: hash_cp_stat(d)})
+    return files_hash
 
 def user_in_group(user, group):
     """ Check if user is in group
