@@ -146,10 +146,16 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     shutil.copytree(tempdirwithfiles[0], tempdcopy, symlinks=True)
     h2 = utils.hash_walk(tempdcopy)
     print(h1)
-    print(h2)   
+    print(h2)
+    print("*"*100)
+    k1 = list(h1.keys())
+    k2 = list(h2.keys())
+    print(k1[0])
+    print(k2[0])
+    print(utils.cp_stat(k1[0]), utils.cp_stat(k2[0]), sep=' : ')
     h1sum = reduce(lambda x, y: x ^ y, h1.values())
 
     h2sum = reduce(lambda x, y: x ^ y, h2.values())
-    assert h1sum == h2sum
+    assert 0 #h1sum == h2sum
 
     shutil.rmtree(tempdcopy)
