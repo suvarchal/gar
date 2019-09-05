@@ -144,5 +144,6 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
 
     h2 = utils.hash_walk(tempdcopy)
     print(h1, h2, sep=' : ') 
-    assert [x[1] for x in h1] == [x[1] for x in h2]
+    #assert [x[1] for x in h1] == [x[1] for x in h2]
+    assert h1 == h2
     shutil.rmtree(tempdcopy)

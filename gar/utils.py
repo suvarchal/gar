@@ -6,6 +6,7 @@ import json
 import time
 from pathlib import Path
 from collections import OrderedDict
+from hashlib import sha1
 
 passwdfi = Path("/etc/passwd")
 passwdfi = passwdfi if passwdfi.exists() and os.access(passwdfi, os.R_OK) else None
@@ -136,7 +137,7 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         special files are ignored by the has function
         
     """
-    files_hash = {}
+    files_hash = sha1()
     # use walk and sorted to ensure the listing order is same every run
     # files without read permissions will be ignored
     for root, dirs, files in os.walk(fdpath):
@@ -145,11 +146,11 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         # add ignored clause? 
         for fi in sorted(files):
             fip = root / fi
-            files_hash.update({fip: hash_cp_stat(fip)})
+            files_hash.update(hash_cp_stat(fip, hash_function=sha1).hexdigest().encode())
         for d in sorted(dirs):
             dp = root / d
-            files_hash.update({dp: hash_cp_stat(dp)})
-    return  [(x[0], x[1]) for x in sorted(files_hash.items())]
+            files_hash.update(hash_cp_stat(dp, hash_function=sha1).hexdigest().encode())
+    return files_hash.hexdigest()
 
 def user_in_group(user, group):
     """ Check if user is in group
