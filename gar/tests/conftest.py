@@ -101,7 +101,7 @@ def create_users():
         # clean up
         for g in created_groups:
             os.system(f"sudo groupdel {g}")
-        for u, g in created_users.items():
-            os.system("sudo userdel -r {u}")
+        for u in created_users:
+            os.system(f"sudo userdel -r {u}")
     else:
         yield None
