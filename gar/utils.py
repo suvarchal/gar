@@ -133,7 +133,7 @@ def hr_filestat(filepath):
 def hash_walk(fdpath, follow_symlinks=False, ignore=None):
     """ Returns hash for entire directory tree using default hash.
         function only scans for files, directories and symlinks:
-        special files are ignored by the hash function
+        special files are ignored by the has function
         
     """
     files_hash = OrderedDict()
@@ -144,11 +144,17 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         # functions called ignore all other kinds of files (eg.., device files)
         # add ignored clause? 
         for fi in sorted(files):
-            fip = root / fi
-            files_hash.update({fip: hash_cp_stat(fi)})
+            fi = root / fi
+            if fi.is_symlink():
+                files_hash.update({fi: hash_cp_stat(fi)})
+            else:
+                files_hash.update({fi: hash_cp_stat(fi)})
         for d in sorted(dirs):
-            dp = root / d
-            files_hash.update({dp: hash_cp_stat(d)})
+            d = root / d
+            if d.is_symlink():
+                files_hash.update({d: hash_cp_stat(d)})
+            else:
+                files_hash.update({d: hash_cp_stat(d)})
     return files_hash
 
 def user_in_group(user, group):
