@@ -136,11 +136,11 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     os.unlink(tempfcopy)
     
     # check hash works for directories with files
-    h1 = utils.hash_walk(tempdirwithfiles[0])
+    h1 = utils.hash_walk(tempdirwithfiles)
     tempdcopy = Path("tmpdircopy")
 
     shutil.rmtree(tempdcopy) if tempdcopy.exists() else None
-    shutil.copytree(tempdirwithfiles[0], tempdcopy, symlinks=True)
+    shutil.copytree(tempdirwithfiles, tempdcopy, symlinks=True)
 
     h2 = utils.hash_walk(tempdcopy)
     print(h1, h2, sep=' : ') 
