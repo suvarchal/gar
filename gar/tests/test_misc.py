@@ -143,6 +143,6 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     shutil.copytree(tempdirwithfiles[0], tempdcopy, symlinks=True)
 
     h2 = utils.hash_walk(tempdcopy)
-    
+    print(h1, h2, sep=' : ') 
     assert [x[1] for x in h1] == [x[1] for x in h2]
     shutil.rmtree(tempdcopy)

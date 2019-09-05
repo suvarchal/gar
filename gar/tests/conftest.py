@@ -75,16 +75,27 @@ def setup(request):
             func1()
     except KeyError:
         func2()
-
     def teardown():
         print('teardown the setup')
     request.addfinalizer(teardown)
 
-    def create_users():
-        """ Create 5 users and x groups """
-        groups = ["group1","group2"]
-        users  = {"user1":["group1"],"user2":["group1","group2"],"user3":["group2"]}
-        for g in groups:
-            os.system("add group ".format(g))
-        for u,g in users.items():
-            "useradd -r -m -G {} {}".format(" ".join(u),g)
+def create_users():
+    """ Create 3 users and 2 groups """
+    groups = ["group1", "group2"]
+    users = {"user1": ["group1"], "user2": ["group1", "group2"], "user3": ["group2"]}
+    created_groups = []
+    for g in groups:
+        status = os.system(f"sudo addgroup {g}")
+        if status == 0:
+            created_groups.append(g)
+    created_users = {}
+    for u, g in users.items():
+        status = os.system("sudo useradd -r -m -G {} {}".format(" ".join(u),g))
+        if status == 0:
+            created_users.update({u, g})
+    yield (created_groups, created_users)
+    # clean up
+    for g in created_groups:
+        os.system(f"sudo groupdel {g}")
+    for u,g in created_users.items():
+        os.system("sudo userdel -r {u}")
