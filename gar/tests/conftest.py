@@ -2,6 +2,7 @@ import pytest
 import os
 import tempfile
 import pwd
+import grp
 import shutil
 from pathlib import Path
 
@@ -58,14 +59,14 @@ def tempdirwithfiles(tempdir, create_users):
         link_tf2 = Path(tempdir)/Path(tf2).name
         os.symlink(tf2, link_tf2)
         if user:
-            upwd = pwd.getpwnam(user)
-            uid = upwd.pw_uid
-            gid = upwd.pw_gid
-            os.chown(sdir, uid, gid, follow_symlinks=False)
-            os.chown(tf1, uid, gid, follow_symlinks=False)
-            os.chown(tf2, uid, gid, follow_symlinks=False)
-            os.chown(renamedlink_tf1, uid, gid, follow_symlinks=False)
-            os.chown(link_tf2, uid, gid, follow_symlinks=False)
+            gid = pwd.getpwnam(user).pw_gid
+            group_name = grp.getgrnam(gid).gr_name
+            status = os.system(f"sudo chown -R {sdir} {user}:{group_name}")
+            assert status == 0
+            status = os.system(f"sudo chown {tf1} {user}:{group_name}")
+            assert status == 0
+            status = os.system(f"sudo chown {tf2} {user}:{group_name}")
+            assert status == 0
         return (tempdir, sdir, tf1, tf2, renamedlink_tf1, link_tf2)
     if create_users:
         (groups, users) = create_users
@@ -92,7 +93,8 @@ def create_users():
                 created_groups.append(g)
         created_users = []
         for u, g in users.items():
-            status = os.system("sudo useradd -r -m -G {} {}".format(" ".join(g),u))
+            groups_str = " ".join(g) if len(g)>1 else g
+            status = os.system("sudo useradd -r -m -G {} {}".format(groups_str, u))
             if status == 0:
                 created_users.append(u)
         yield (created_groups, created_users)
