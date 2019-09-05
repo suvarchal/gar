@@ -144,26 +144,5 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
 
     h2 = utils.hash_walk(tempdcopy)
     
-    print(h1)
-    print(h2)
-    print("*"*100)
-    h1x={}
-    h2x={}
-    for k1,k2 in zip(h1.keys(),h2.keys()):
-        h1x.update({k1: utils.hash_cp_stat(k1)})
-        h2x.update({k2: utils.hash_cp_stat(k2)})
-        print(k1, utils.hash_cp_stat(k1), sep=" : ")
-        print(k2, utils.hash_cp_stat(k2), sep=" : ")
-        print(utils.cp_stat(k1), utils.cp_stat(k2), sep=' : ')
-    print("HX"+"*"*100)
-    print(h1x, h2x, sep=" : ")
-    v1= [x[1] for x in sorted(h1x.items())]
-    v2= [x[1] for x in sorted(h2x.items())]
-    print(v1, v2)
-    assert v1 == v2
-#    below hash addition didn't work?
-#    h1sum = reduce(lambda x, y: x ^ y , h1.values())
-#    h2sum = reduce(lambda x, y: x ^ y , h2.values())
-#    assert h1sum == h2sum
-
+    assert [x[1] for x in h1] == [x[1] for x in h2]
     shutil.rmtree(tempdcopy)

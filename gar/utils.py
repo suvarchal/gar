@@ -136,7 +136,7 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         special files are ignored by the has function
         
     """
-    files_hash = OrderedDict()
+    files_hash = {}
     # use walk and sorted to ensure the listing order is same every run
     # files without read permissions will be ignored
     for root, dirs, files in os.walk(fdpath):
@@ -149,7 +149,7 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         for d in sorted(dirs):
             dp = root / d
             files_hash.update({dp: hash_cp_stat(dp)})
-    return files_hash
+    return  [(x[0], x[1]) for x in sorted(files_hash.items())]
 
 def user_in_group(user, group):
     """ Check if user is in group
