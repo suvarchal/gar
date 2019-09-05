@@ -144,17 +144,11 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         # functions called ignore all other kinds of files (eg.., device files)
         # add ignored clause? 
         for fi in sorted(files):
-            fi = root / fi
-            if fi.is_symlink():
-                files_hash.update({fi: hash_cp_stat(fi)})
-            else:
-                files_hash.update({fi: hash_cp_stat(fi)})
+            fip = root / fi
+            files_hash.update({fip: hash_cp_stat(fip)})
         for d in sorted(dirs):
-            d = root / d
-            if d.is_symlink():
-                files_hash.update({d: hash_cp_stat(d)})
-            else:
-                files_hash.update({d: hash_cp_stat(d)})
+            dp = root / d
+            files_hash.update({dp: hash_cp_stat(dp)})
     return files_hash
 
 def user_in_group(user, group):

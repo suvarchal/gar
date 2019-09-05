@@ -136,20 +136,17 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
     os.unlink(tempfcopy)
     
     # check hash works for directories with files
-    #h1 = hashlib.sha1()
     h1 = utils.hash_walk(tempdirwithfiles[0])
-    #assert not h1 == h2[0]
-
     tempdcopy = Path("tmpdircopy")
-    shutil.rmtree(tempdcopy) if tempdcopy.exists() else None
 
+    shutil.rmtree(tempdcopy) if tempdcopy.exists() else None
     shutil.copytree(tempdirwithfiles[0], tempdcopy, symlinks=True)
+
     h2 = utils.hash_walk(tempdcopy)
+    
     print(h1)
     print(h2)
     print("*"*100)
-    k1 = list(h1.keys())
-    k2 = list(h2.keys())
     h1x={}
     h2x={}
     for k1,k2 in zip(h1.keys(),h2.keys()):
@@ -158,18 +155,15 @@ def test_hash_utils(tempf, tempsym, tempdirwithfiles):
         print(k1, utils.hash_cp_stat(k1), sep=" : ")
         print(k2, utils.hash_cp_stat(k2), sep=" : ")
         print(utils.cp_stat(k1), utils.cp_stat(k2), sep=' : ')
-    print("HX*"*100)
+    print("HX"+"*"*100)
     print(h1x, h2x, sep=" : ")
     v1= [x[1] for x in sorted(h1x.items())]
     v2= [x[1] for x in sorted(h2x.items())]
-    print(v1,v2)
-    assert v1==v2
-    #print('H1X',reduce(lambda x,y: x ^ y , v1))
-    #print('H2X',reduce(lambda x,y: x ^ y , v2))
-    h1sum = reduce(lambda x, y: x ^ y , h1.values())
-
-    h2sum = reduce(lambda x, y: x ^ y , h2.values())
-    print(h1sum, h2sum, sep=" : ")
-    assert 0 #h1sum == h2sum
+    print(v1, v2)
+    assert v1 == v2
+#    below hash addition didn't work?
+#    h1sum = reduce(lambda x, y: x ^ y , h1.values())
+#    h2sum = reduce(lambda x, y: x ^ y , h2.values())
+#    assert h1sum == h2sum
 
     shutil.rmtree(tempdcopy)
