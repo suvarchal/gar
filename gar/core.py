@@ -2,26 +2,27 @@ from pathlib import Path
 import shutil
 from shutil import SameFileError, SpecialFileError
 import os
+from .utils import cp_stat, cp_dirstat
 
 
 def set_owner_mode_xattr(src, dst):
     # src = Path(src)
     # dst = Path(dst)
     src_stat = src.stat()
-    os.chown(dst, src_stat.st_uid, src_stat.st_gid)
+    #os.chown(dst, src_stat.st_uid, src_stat.st_gid)
     os.chmod(dst, mode=src_stat.st_mode)
-    os.utime(dst, ns=(src_stat.st_atime_ns, src_stat.st_mtime_ns))
-    shutil._copyxattr(src, dst)
+    #os.utime(dst, times=(src_stat.st_atime, src_stat.st_mtime))
+    #shutil._copyxattr(src, dst)
 
 
 def lset_owner_mode_xattr(src, dst):
     # src = Path(src)
     # dst = Path(dst)
     src_stat = src.stat()
-    os.chown(dst, src_stat.st_uid, src_stat.st_gid, follow_symlinks=False)
+    #os.chown(dst, src_stat.st_uid, src_stat.st_gid, follow_symlinks=False)
     os.chmod(dst, mode=src_stat.st_mode)
-    os.utime(dst, ns=(src_stat.st_atime_ns, src_stat.st_mtime_ns), follow_symlinks=False)
-    shutil._copyxattr(src, dst, follow_symlinks=False)
+    #os.utime(dst, ns=(src_stat.st_atime_ns, src_stat.st_mtime_ns), follow_symlinks=False)
+    #shutil._copyxattr(src, dst, follow_symlinks=False)
 
 
 def copy(src, dst, ignore=None, logger=None, **kwargs):
@@ -34,17 +35,30 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
     """
     if logger:
         logger.__setattr__("name", "copy")
+
     src = Path(src)
     dst = Path(dst)
-    if not dst.exists():
-        os.makedirs(dst)
-        # try block?
-        set_owner_mode_xattr(src, dst)
+    
+    # disable the function for src that is not a directory
+    if src.is_file():
+        raise NotADirectoryError(f"src {src} is a file, pass a directory")
 
     # a trick to send original src information to
     # recursive call of the function
     if 'scope' not in kwargs:
         kwargs['scope'] = str(src)
+
+    if not dst.exists():
+        #os.makedirs(dst)
+        os.mkdir(dst)
+        # try block?
+        set_owner_mode_xattr(src, dst)
+        print(src,src.stat().st_atime_ns, src.stat().st_mtime_ns)
+        print(dst,dst.stat().st_atime_ns, dst.stat().st_mtime_ns)
+        os.utime(dst, ns=(src.stat().st_atime_ns, src.stat().st_mtime_ns), follow_symlinks=False)
+        print(dst,dst.stat().st_atime_ns, dst.stat().st_mtime_ns)
+        print(cp_stat(dst))
+        print(cp_dirstat(dst))
 
     # enquiring file stat on DirEntry of scandir is
     # siginicantly faster then using scr.iterdir()
@@ -69,32 +83,41 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
                     newrelpath = os.path.relpath(os.path.realpath(fi), src)
                     os.symlink(newrelpath, fi_dst)
                     # permissions of source file are retained.
-                    lset_owner_mode_xattr(fi, fi_dst)
+                    #lset_owner_mode_xattr(fi, fi_dst)
+                    os.utime(fi_dst, ns=(fi.stat().st_atime_ns, fi.stat().st_mtime_ns), follow_symlinks=False)
             
                 # file outside scope of original src
                 else:
                     # maintain the out-of-scope symlink
-                    shutil.copy(fi, fi_dst, follow_symlinks=False)
-                    lset_owner_mode_xattr(fi, fi_dst)
+                    shutil.copy2(fi, fi_dst, follow_symlinks=False)
+                    #lset_owner_mode_xattr(fi, fi_dst)
+                    os.utime(fi_dst, ns=(fi.stat().st_atime_ns, fi.stat().st_mtime_ns), follow_symlinks=False)
             elif fi.is_dir():
                 # reccursive call to copy
                 copy(fi, fi_dst)
-                set_owner_mode_xattr(fi, fi_dst)
+                os.utime(fi_dst, ns=(fi.stat().st_atime_ns, fi.stat().st_mtime_ns), follow_symlinks=False)
+                #set_owner_mode_xattr(fi, fi_dst)
             # all files
             # if file type is not supported for coping
             # raises error
             else:
-                shutil.copy(fi, fi_dst, follow_symlinks=False)
-                set_owner_mode_xattr(fi, fi_dst)
+                shutil.copy2(fi, fi_dst, follow_symlinks=False)
+                os.utime(fi_dst, ns=(fi.stat().st_atime_ns, fi.stat().st_mtime_ns), follow_symlinks=False)
+                #set_owner_mode_xattr(fi, fi_dst)
 
         except (SameFileError, SpecialFileError) as ex:
-            logger.warn(f"Skipping: {ex.filename}")
-
+            msg = f"Skipping {ex.filename} same as {ex.filename1}"
+            if logger:
+                logger.warn(msg)
+            else:
+                print(msg)
         except (OSError, PermissionError) as ex:
             msg = "Do you have enough permissions to change file ownership?\n"\
                   "Run as privilaged user or see `gar --help` for options."
-            logger.error(f"{fi.path} to {fi_dst} {ex} \n{msg} ")
-
+            if logger:
+                logger.error(f"{fi.path} to {fi_dst} {ex} \n{msg}")
+            else:
+                print(msg,ex.filename,ex.filename2, ex)
         except IOError as ex:
             if logger:
                 logger.critical(ex)

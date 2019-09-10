@@ -71,9 +71,9 @@ def cp_linkstat(fdpath, include_name=True, follow_symlinks=False):
     
         finfo = {'Owner': pwd.getpwuid(fstat.st_uid).pw_name, 
                  'Group': grp.getgrgid(fstat.st_gid).gr_name,
-                 'Mode': oct(fstat.st_mode),
-                 'Modified': fstat.st_mtime_ns,
-                 'Accessed': fstat.st_atime_ns}
+                 'Mode': oct(fstat.st_mode)}
+                 #'Modified': fstat.st_mtime_ns,
+                 #'Accessed': fstat.st_atime_ns}
         if include_name:
             finfo.update({'Name': fdpath.name})
         return OrderedDict(finfo)
@@ -126,9 +126,9 @@ def hr_filestat(filepath):
              'Mode': oct(fstat.st_mode),
              'Size': hr_size(fstat.st_size),
              'Device': fstat.st_dev,
-             'Created': time.ctime(fstat.st_ctime),
              'Modified': time.ctime(fstat.st_mtime),
-             'Accessed': time.ctime(fstat.st_atime)}
+             'Accessed': time.ctime(fstat.st_atime),
+             'Changed': time.ctime(fstat.st_ctime)}
     return OrderedDict(finfo)
 
 def hash_walk(fdpath, follow_symlinks=False, ignore=None):
@@ -137,6 +137,10 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
         special files are ignored by the has function
         
     """
+    if not isinstance(fdpath, Path):
+        fdpath = Path(fdpath)
+    if not fdpath.exists():
+        return None
     files_hash = sha1()
     # use walk and sorted to ensure the listing order is same every run
     # files without read permissions will be ignored
@@ -151,6 +155,43 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
             dp = root / d
             files_hash.update(hash_cp_stat(dp, hash_function=sha1).hexdigest().encode())
     return files_hash.hexdigest()
+
+def dircmp(src, dst):
+    if not (isinstance(src, Path) and isinstance(dst, Path)):
+        src = Path(src)
+        dst = Path(dst)
+    if not (src.is_dir() and dst.is_dir()):
+        raise NotADirectoryError(f"src: {src} and dst: {dst} must be directories")
+    match = []
+    mismatch = []
+    miss = []
+    for sroot, sdirs, sfiles in os.walk(src, followlinks=False):
+        sroot = Path(sroot)
+        for fi in sfiles:
+            fisp = sroot / fi
+            fidp = os.path.relpath(os.path.abspath(fisp), src)
+            fidp = dst / fidp
+            if not fidp.exists():
+                miss.append((fisp,fidp))
+                continue
+            if cp_stat(fisp) == cp_stat(fidp):
+                match.append((fisp,fidp))
+            else:
+                mismatch.append(('file',cp_stat(fisp),cp_stat(fidp)))
+        for di in sdirs:
+            dsp = sroot / di
+            ddp = os.path.relpath(os.path.abspath(dsp), src)
+            ddp = dst / ddp
+            if not ddp.exists():
+                miss.append((dsp,ddp))
+                continue
+            if cp_stat(dsp) == cp_stat(ddp):
+                match.append((dsp,ddp))
+            else:
+                mismatch.append(('dir',cp_stat(dsp),cp_stat(ddp)))
+    return (match, mismatch, miss)    
+
+
 
 def user_in_group(user, group):
     """ Check if user is in group
