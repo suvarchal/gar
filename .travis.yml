@@ -20,7 +20,7 @@ before_install:
 script:
  - tox
  - gar --help
- - pytest --cov-report term-missing --cov=gar
+#- pytest --cov-report term-missing --cov=gar
 after_success:
  - coveralls
  - ls ../*
