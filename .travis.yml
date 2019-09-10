@@ -22,13 +22,6 @@ script:
  - gar --help
 # - pytest --cov-report term-missing --cov=gar
 after_success:
- - coveralls
- - |
-   if [[ $TRAVIS_TAG ]]; then 
-   echo "tagged" 
-   echo $TRAVIS_TAG
-   echo ${TRAVIS_TAG#"v"}
-   fi
  - ls ../*
 before_deploy:
  - export DTAG=`echo ${TRAVIS_TAG#"v"}`
