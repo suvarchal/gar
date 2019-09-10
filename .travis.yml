@@ -12,10 +12,15 @@ before_install:
    sh ci/build_debian.sh
    sh ci/test_debian.sh
    fi
+ - travis_retry pip install pytest-cov
+ - travis_retry pip install python-coveralls
+ - travis_retry pip install click
+ - travis_retry pip install tox
+ - pip install -e .
 script:
  - tox
  - gar --help
-# - pytest --cov-report term-missing --cov=gar
+ - pytest --cov-report term-missing --cov=gar
 after_success:
  - coveralls
  - ls ../*
