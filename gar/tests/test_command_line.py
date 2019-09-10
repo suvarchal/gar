@@ -1,5 +1,6 @@
 import os
-import tempfile
+from pathlib import Path
+import shutil
 from click.testing import CliRunner
 from gar.command_line import cli
 # from gar.logger import logfilepath
@@ -24,5 +25,14 @@ def test_command_line_invoke():
     result = runner.invoke(cli, ["copy", "--help"])
     assert result.exit_code == 0
 
-    # result = runner.invoke(cli, ["move","--help"])
-    # assert result.exit_code == 0
+
+def test_command_line_copy(tempdirwithfiles):
+    runner = CliRunner()
+    user = os.getlogin() or os.getenv("USER")
+    print(user)
+    td = Path(tempdirwithfiles.name)
+    td.mkdir()
+    result = runner.invoke(cli, ["copy", user,
+                                 str(tempdirwithfiles), str(td)])
+    assert result.exit_code == 0
+    shutil.rmtree(td)

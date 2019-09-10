@@ -2,7 +2,7 @@ import pytest
 import os
 from pathlib import Path
 import shutil
-from gar.core import copy
+from gar.core import copy, gcopy
 from gar.utils import hash_cp_stat, hash_walk, dircmp
 
 def test_copy(tempf, tempdir, tempdirwithfiles):
@@ -33,6 +33,22 @@ def test_copy(tempf, tempdir, tempdirwithfiles):
     print("mismatch :",mismatch)
     print("miss :",miss)
 
+    assert hash_walk(tempdirwithfiles) == hash_walk(testcopydir)
+    assert mismatch == []
+    assert miss == []
+    shutil.rmtree(testcopydir)
+
+
+def test_gcopy(tempdirwithfiles):
+    user = os.getlogin() or os.getenv("USER")
+    testcopydir = Path() / tempdirwithfiles.name
+    testcopydir.mkdir()
+    gcopy(user, tempdirwithfiles, testcopydir)
+    
+    match, mismatch, miss = dircmp(tempdirwithfiles, testcopydir)
+    print("match :", match)
+    print("mismatch :", mismatch)
+    print("miss :", miss)
     assert hash_walk(tempdirwithfiles) == hash_walk(testcopydir)
     assert mismatch == []
     assert miss == []

@@ -1,8 +1,9 @@
-from pathlib import Path
-import shutil
-from shutil import SameFileError, SpecialFileError
 import os
-from .utils import cp_stat, cp_dirstat
+import shutil
+from pathlib import Path
+from functools import partial
+from shutil import SameFileError, SpecialFileError
+from .utils import cp_stat, cp_dirstat, user_in_group
 
 
 def set_owner_mode_xattr(src, dst):
@@ -124,3 +125,24 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
             else:
                 print(ex)
 
+
+def ignore_not_group(group, srcfile, ignorefilegroup=True):
+    """ srcfile must be a pathlib.Path object
+        default checks based on owner of file in group
+        checkfilegroup chgrp
+        returns True to ignore and False if not
+    """
+    src_stat = srcfile.stat()
+    uig = user_in_group(src_stat.st_uid, group)
+
+    if ignorefilegroup:
+        return not uig
+    else:
+        gid = getgid(group)
+        return not (src_stat.st_gid == gid or uig)
+
+
+def gcopy(group, src, dst):
+    """TODO:handle skip from cli"""
+    ignore_fn = partial(ignore_not_group, group) # ignorefilegroup=False)
+    copy(src, dst, ignore=ignore_fn)
