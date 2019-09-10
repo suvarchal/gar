@@ -70,7 +70,7 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
         if ignore is not None:
             if ignore(fi):
                 continue
-        
+
         fi_dst = dst / fi.name
         try:
             if fi.is_symlink():

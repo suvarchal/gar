@@ -37,4 +37,3 @@ def test_copy(tempf, tempdir, tempdirwithfiles):
     assert mismatch == []
     assert miss == []
     shutil.rmtree(testcopydir)
-    
