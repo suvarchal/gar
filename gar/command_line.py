@@ -3,7 +3,7 @@ import os
 import logging
 from pathlib import Path
 import click
-from .core import copy, gcopy
+from .core import copy, gcopy, verify
 from .logger import setup_logger, logfilepath
 from .lock import SimpleFileLock
 from .utils import getgid
@@ -74,6 +74,19 @@ def cli_copy(cli, group, src, dst, debug):
         copy(src, dst)
     click.echo(f"See log file for errors {logfilepath/'gar.log'}")
 
+@cli.command(name="verify")
+@click.argument("src", type=click.Path(exists=True))
+@click.argument("dst", type=click.Path(exists=True))
+def cli_verify(src, dst):
+    """ Verifies integrity of an archive by comparing
+    src to dst.
+    """
+    if Path(src).resolve() == Path(dst).resolve():
+        raise click.ClickException(f"src: {src} and dst: {dst} are same?")
+    compare = verify(src, dst)
+    for k in compare:
+        for v in compare[k]:
+            print(k, v, sep=": ", file=sys.stdout)
 
 if __name__ == "__main__":
     cli()

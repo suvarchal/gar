@@ -2,9 +2,8 @@ import pytest
 import os
 from pathlib import Path
 import shutil
-from gar.core import copy, gcopy
+from gar.core import copy, gcopy, verify
 from gar.utils import hash_cp_stat, hash_walk, dircmp
-
 def test_copy(tempf, tempdir, tempdirwithfiles):
     # src has to be a directory
     with pytest.raises(NotADirectoryError):
@@ -53,3 +52,15 @@ def test_gcopy(tempdirwithfiles):
     assert mismatch == []
     assert miss == []
     shutil.rmtree(testcopydir)
+
+
+def test_verify(tempdirwithfiles):
+    tempdircopy = Path() / tempdirwithfiles.name
+    tempdircopy.mkdir()
+    copy(tempdirwithfiles, tempdircopy)
+    compare = verify(str(tempdirwithfiles), str(tempdircopy))
+    assert isinstance(compare, dict)
+    assert compare['mismatch'] == []
+    assert compare['miss'] == []
+    shutil.rmtree(tempdircopy)
+    

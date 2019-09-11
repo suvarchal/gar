@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from functools import partial
 from shutil import SameFileError, SpecialFileError
-from .utils import cp_stat, cp_dirstat, user_in_group
+from .utils import cp_stat, cp_dirstat, user_in_group, dircmp
 
 
 def set_owner_mode_xattr(src, dst):
@@ -146,3 +146,12 @@ def gcopy(group, src, dst):
     """TODO:handle skip from cli"""
     ignore_fn = partial(ignore_not_group, group) # ignorefilegroup=False)
     copy(src, dst, ignore=ignore_fn)
+
+def verify(src, dst):
+    src = Path(src)
+    dst = Path(dst)
+    match, mismatch, miss = dircmp(src, dst)
+    compare = {'match': match,
+               'mismatch': mismatch,
+               'miss': miss}
+    return compare

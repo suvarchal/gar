@@ -157,6 +157,11 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
     return files_hash.hexdigest()
 
 def dircmp(src, dst):
+    """ Compares files in src to dst for integrity
+    returns list of match, missmatch, and misses
+
+    TODO: add skip for special files and read errors
+    """
     if not (isinstance(src, Path) and isinstance(dst, Path)):
         src = Path(src)
         dst = Path(dst)

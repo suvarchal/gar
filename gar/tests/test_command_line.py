@@ -25,6 +25,9 @@ def test_command_line_invoke():
     result = runner.invoke(cli, ["copy", "--help"])
     assert result.exit_code == 0
 
+    result = runner.invoke(cli, ["verify", "--help"])
+    assert result.exit_code == 0
+
 
 def test_command_line_copy(tempdirwithfiles):
     runner = CliRunner()
@@ -35,4 +38,9 @@ def test_command_line_copy(tempdirwithfiles):
     result = runner.invoke(cli, ["copy", user,
                                  str(tempdirwithfiles), str(td)])
     assert result.exit_code == 0
+
+    # check if verify works
+    result = runner.invoke(cli, ["verify", str(tempdirwithfiles), str(td)])
+    assert result.exit_code == 0
+
     shutil.rmtree(td)
