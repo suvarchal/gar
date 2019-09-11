@@ -50,6 +50,33 @@ def set_owner_mode_xattr(src, dst, follow_symlinks=False):
         except PermissionError:
             raise PermissionError(f"Permissions of {dst} cannot be changed to that of {src}")
 
+def log_or_print(msg, logger=None):
+    if logger:
+        logger.warn(msg)
+    else:
+        print(msg)
+
+
+def handle_exception(ex, fi=None, fi_dst=None, logger=None):
+    if type(ex) == SameFileError:
+        msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same"
+        log_or_print(msg, logger=logger)
+    elif type(ex) == SpecialFileError:
+        msg = f"Skipping: {str(fi.path)} is a special file"
+        log_or_print(msg, logger=logger)
+    elif type(ex) == PermissionError:
+        msg = f"{ex}\nHint:Do you have enough permissions to change file ownership?"
+        log_or_print(msg, logger=logger)
+    elif type(ex) == OSError:
+        msg = f"{ex}\nHint:Possible racing condition?"
+        log_or_print(msg, logger=logger)
+    elif type(ex) == IOError:
+        msg = f"{ex}\nHint:Disk out of space?"
+        log_or_print(msg, logger=logger)
+    else:
+        msg = f"{ex}\n Unknown exception to the program"\
+               "raise an issue with developers"
+        log_or_print(msg, logger=logger)
 
 def copy(src, dst, ignore=None, logger=None, **kwargs):
     """
@@ -57,6 +84,7 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
     `source` to `destination` retaining directory
     structure and file permissions and ownership
 
+    ignore will ignore a directory will not scan the directory
     Returns None
     """
     if logger:
@@ -77,7 +105,11 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
     if not dst.exists():
         #os.makedirs(dst)
         os.mkdir(dst)
-        set_owner_mode_xattr(src, dst)
+        # do not raise exceptions here so that root dirs can be scanned recursively
+        try:
+            set_owner_mode_xattr(src, dst)
+        except Exception as ex:
+            pass
 
     # enquiring file stat on DirEntry of scandir is
     # siginicantly faster then using scr.iterdir()
@@ -86,8 +118,9 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
         # is destination writable?
         # is contains enough space?
         # filter for files and group
+        # ignore only files otherwise scanning dirs owned by root is not possible
         if ignore is not None:
-            if ignore(fi):
+            if fi.is_file() and ignore(fi):
                 continue
 
         fi_dst = dst / fi.name
@@ -119,12 +152,18 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
             # all files
             # if file type is not supported for coping
             # raises error
-            else:
+            elif fi.is_file():
                 shutil.copy2(fi, fi_dst, follow_symlinks=False)
                 os.utime(fi_dst, 
                          ns=(fi.stat().st_atime_ns, fi.stat().st_mtime_ns),
                          follow_symlinks=False)
                 set_owner_mode_xattr(fi, fi_dst)
+            else:
+                msg = f"Skipping: {str(fi.path)} is special file"
+                if logger:
+                    logger.warn(msg)
+                else:
+                    print(msg)
 
         except SameFileError:
             msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same"
@@ -136,20 +175,27 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
             msg = f"Skipping: {str(fi.path)} is a special file"
             print(msg)
         except PermissionError as ex:
-            msg = "Do you have enough permissions to change file ownership?\n"\
-                  "Run as privilaged user or see `gar --help` for options."
+            msg = "Do you have enough permissions to change file ownership?"
             if logger:
                 logger.error(f"{fi.path} to {fi_dst} {ex} \n{msg}")
             else:
-                print(msg, ex.filename, ex.filename2, ex)
+                print(msg, ex)
         except OSError as ex:
             msg = "Possible racing condition?"
-            print(msg, ex) #file1/file2?
+            print(ex, msg)
         except IOError as ex:
             if logger:
                 logger.critical(ex)
             else:
                 print(ex)
+    # remove empty not 
+    if ignore is not None:
+        # check if dir not ignored is empty
+        if fi.is_dir() and ignore(fi):
+            try:
+                dst.rmdir()
+            except Exception:
+                pass
 
 
 def ignore_not_group(group, srcfile, ignorefilegroup=True):
@@ -173,6 +219,7 @@ def gcopy(group, src, dst):
     ignore_fn = partial(ignore_not_group, group) # ignorefilegroup=False)
     copy(src, dst, ignore=ignore_fn)
 
+
 def verify(src, dst):
     src = Path(src)
     dst = Path(dst)
@@ -181,3 +228,18 @@ def verify(src, dst):
                'Mismatch': mismatch,
                'Miss': miss}
     return compare
+
+
+def move(src, dst, ignore, logger):
+    """
+    dirs are created files are moved and directory is deleted if empty
+    """
+
+    src = Path(src)
+    dst = Path(dst)
+    
+    # check if src and dst exist
+    # and are directories
+    
+    # for 
+
