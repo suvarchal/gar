@@ -45,6 +45,7 @@ def tempdirwithfiles(tempdir, create_users):
                 |-renamedlink (relative symlink to ../tf1)
             |-tf1 (5 bytes)
             |-tf2 (symlink to td/tf2)
+            |-tf3 (file with permissions 640 )
     """
     def create_files(user=None):
         sdir = tempfile.mkdtemp(dir=tempdir)
@@ -58,6 +59,10 @@ def tempdirwithfiles(tempdir, create_users):
         # abs symlink
         link_tf2 = Path(tempdir)/Path(tf2).name
         os.symlink(tf2, link_tf2)
+        # file with permissions 640
+        _, tf3 = tempfile.mkstemp(dir=tempdir)
+        Path(tf3).write_bytes(b"tempo")
+        os.chmod(tf3, 0o640)
         if user:
             gid = pwd.getpwnam(user).pw_gid
             group_name = grp.getgrnam(gid).gr_name

@@ -60,7 +60,7 @@ def test_verify(tempdirwithfiles):
     copy(tempdirwithfiles, tempdircopy)
     compare = verify(str(tempdirwithfiles), str(tempdircopy))
     assert isinstance(compare, dict)
-    assert compare['mismatch'] == []
-    assert compare['miss'] == []
+    print(compare)
+    assert compare['Mismatch'] == []
+    assert compare['Miss'] == []
     shutil.rmtree(tempdircopy)
-    

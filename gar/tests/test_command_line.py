@@ -41,6 +41,7 @@ def test_command_line_copy(tempdirwithfiles):
 
     # check if verify works
     result = runner.invoke(cli, ["verify", str(tempdirwithfiles), str(td)])
+    print(result.output)
     assert result.exit_code == 0
 
     shutil.rmtree(td)

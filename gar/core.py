@@ -10,9 +10,13 @@ def set_owner_mode_xattr(src, dst):
     # src = Path(src)
     # dst = Path(dst)
     src_stat = src.stat()
-    #os.chown(dst, src_stat.st_uid, src_stat.st_gid)
+    isuser = src_stat.st_uid == os.getuid()
+    isgroup = src_stat.st_gid == os.getgid()
+    # if file is not owned by user running the program
+    if not (isuser and isgroup):
+        os.chown(dst, src_stat.st_uid, src_stat.st_gid)
     os.chmod(dst, mode=src_stat.st_mode)
-    #os.utime(dst, times=(src_stat.st_atime, src_stat.st_mtime))
+    os.utime(dst, times=(src_stat.st_atime_ns, src_stat.st_mtime_ns))
     #shutil._copyxattr(src, dst)
 
 
@@ -21,7 +25,7 @@ def lset_owner_mode_xattr(src, dst):
     # dst = Path(dst)
     src_stat = src.stat()
     #os.chown(dst, src_stat.st_uid, src_stat.st_gid, follow_symlinks=False)
-    os.chmod(dst, mode=src_stat.st_mode)
+    #os.chmod(dst, mode=src_stat.st_mode)
     #os.utime(dst, ns=(src_stat.st_atime_ns, src_stat.st_mtime_ns), follow_symlinks=False)
     #shutil._copyxattr(src, dst, follow_symlinks=False)
 
@@ -151,7 +155,7 @@ def verify(src, dst):
     src = Path(src)
     dst = Path(dst)
     match, mismatch, miss = dircmp(src, dst)
-    compare = {'match': match,
-               'mismatch': mismatch,
-               'miss': miss}
+    compare = {'Match': match,
+               'Mismatch': mismatch,
+               'Miss': miss}
     return compare

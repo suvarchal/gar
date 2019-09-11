@@ -5,7 +5,7 @@ with open('README.rst', 'rt') as fh:
 
 setuptools.setup(
     name="gar",
-    version="0.0.14",
+    version="0.0.15",
     author="Suvarchal K. Cheedela",
     author_email="suvarchal.kumar@gmail.com",
     description="Archiving for users and groups",
