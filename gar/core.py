@@ -71,7 +71,7 @@ def handle_exception(ex, fi=None, fi_dst=None, logger=None):
     elif isinstance(ex, OSError):
         msg = f"{ex}"
         log_or_print(msg, logger=logger)
-    elif isinstance(ex,IOError):
+    elif isinstance(ex, IOError):
         msg = f"{ex}\nHint: Disk out of space?"
         log_or_print(msg, logger=logger)
     else :
@@ -161,18 +161,16 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
                 msg = f"Skipping: {str(fi.path)} is a unsupported file"
                 log_or_print(msg, logger=logger)
 
+            if ignore:
+                # check if dir not ignored is empty
+                if fi.is_dir() and ignore(fi):
+                    try:
+                        fi_dst.rmdir()
+                    except OSError:
+                        pass
         except Exception as ex:
             handle_exception(ex, fi, fi_dst, logger)
         # remove empty directories that are ignored
-        if ignore:
-            # check if dir not ignored is empty
-            print("in ignore",fi_dst)
-            if fi.is_dir() and ignore(fi):
-                try:
-                    print("remove dir", fi_dst)
-                    fi_dst.rmdir()
-                except Exception as ex:
-                    print("del error", ex)
     try:
         if not os.path.realpath(src) == kwargs['scope']:
             set_owner_mode_xattr(src, dst)
@@ -209,6 +207,8 @@ def gcopy(group, src, dst):
 
 
 def verify(src, dst):
+    """ gverify?
+    """
     src = Path(src)
     dst = Path(dst)
     match, mismatch, miss = dircmp(src, dst)
