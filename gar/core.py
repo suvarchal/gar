@@ -162,7 +162,7 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
                 log_or_print(msg, logger=logger)
 
             if ignore:
-                # check if dir not ignored is empty
+                # check if dir not ignored is empty is so remove
                 if fi.is_dir() and ignore(fi):
                     try:
                         fi_dst.rmdir()
