@@ -52,6 +52,9 @@ def test_gcopy(tempdirwithfiles):
     assert mismatch == []
     assert miss == []
     shutil.rmtree(testcopydir)
+    # for copy verify if miss == 0
+    # for recopy verify if previous hash is same
+    # for move verify new files dont exist by gwalk
 
 
 def test_verify(tempdirwithfiles):
