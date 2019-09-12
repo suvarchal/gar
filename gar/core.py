@@ -8,23 +8,26 @@ from .utils import cp_stat, cp_dirstat, user_in_group, dircmp, getgid
 
 
 def set_owner_mode_xattr(src, dst, follow_symlinks=False):
-    ispath = (isinstance(src, Path) and isinstance(dst, Path))
-    isdirentry = (isinstance(src, DirEntry) and isinstance(dst, DirEntry))
-    if not (isdirentry and ispath):
-        src = Path(src)
-        dst = Path(dst)
 
-    if isdirentry:
+    if isinstance(src, DirEntry):
         src_stat = src.stat(follow_symlinks=follow_symlinks)
+    else:
+        src = Path(src)
+        if src.is_symlink():
+            src_stat = src.stat() if (follow_symlinks and src.exists()) else src.lstat()
+        else:
+            src_stat = src.stat()
+
+    if isinstance(dst, DirEntry):
         dst_stat = dst.stat(follow_symlinks=follow_symlinks)
     else:
-        src_stat = src.stat()
-        dst_stat = dst.stat()
-        if src.is_symlink():
-            src_stat = src_stat if follow_symlinks else src.lstat()
+        dst = Path(dst)
+        # this can raise file not found for .stat() when target to symlink
+        # doesn't exist handle this by adding option ignore dangling links
         if dst.is_symlink():
-            dst_stat = dst_stat if follow_symlinks else dst.lstat()
-
+            dst_stat = dst.stat() if (follow_symlinks and dst.exists()) else dst.lstat()
+        else:
+            dst_stat = dst.stat()
     # set mode and extra attributes
     if not (src_stat.st_mode == dst_stat.st_mode):
         # try except not necessary?
@@ -48,7 +51,9 @@ def set_owner_mode_xattr(src, dst, follow_symlinks=False):
             os.chown(dst, src_stat.st_uid, src_stat.st_gid,
                      follow_symlinks=follow_symlinks)
         except PermissionError:
-            raise PermissionError(f"Permissions of {dst} cannot be changed to that of {src}")
+            raise PermissionError(f"Mismatch: {src} > {dst} "
+                                  "ownership cannot be assigned.")
+
 
 def log_or_print(msg, logger=None):
     if logger:
@@ -58,56 +63,79 @@ def log_or_print(msg, logger=None):
 
 
 def handle_exception(ex, fi=None, fi_dst=None, logger=None):
-    if isinstance(ex, SameFileError):
+    """Handle exceptions mostly by type except IOError
+    """
+    if type(ex) == SameFileError:
         msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same"
         log_or_print(msg, logger=logger)
-    elif isinstance(ex, SpecialFileError):
-        msg = f"Skipping: {str(fi.path)} is unsupported file"
+    elif type(ex) == SpecialFileError:
+        msg = f"Skipping: {str(fi.path)} is a unsupported file."
         log_or_print(msg, logger=logger)
-    elif isinstance(ex, PermissionError):
+    elif type(ex) == PermissionError:
         msg = f"{ex}\n"\
-               "Hint: Do you have enough permissions to change file ownership?"
+               "\tHint: Do you have enough permissions "\
+               "to change file ownership?"
         log_or_print(msg, logger=logger)
-    elif isinstance(ex, OSError):
+    elif type(ex) == FileNotFoundError:
+        msg = f"Skipping: {ex}\n"\
+               "\t Hint: Possible racing condition?"
+    elif type(ex) == OSError:
         msg = f"{ex}"
-        log_or_print(msg, logger=logger)
+        log_or_print(ex, logger=logger)
+    # handle any instance of IOError
     elif isinstance(ex, IOError):
-        msg = f"{ex}\nHint: Disk out of space?"
+        msg = f"{ex}\n\tHint: Disk out of space?"
         log_or_print(msg, logger=logger)
-    else :
-        msg = f"{ex}\n Unknown exception {str(type(ex))} to the program, "\
-               "please raise an issue with developers"
-        log_or_print(msg, logger=logger)
+    # raise error if other exceptions occur
+    else:
+        msg = f"{ex}\n Unknown exception {ex.args[0]} to the program, "\
+               "please raise an issue with developers."
+        log_or_print(msg)
+
 
 def copy(src, dst, ignore=None, logger=None, **kwargs):
     """
     Copies from files and directories from
     `source` to `destination` retaining directory
-    structure and file permissions and ownership
-    
-    scandir is used for efficiency reasons
+    structure and file permissions, access and modification times
+    and ownership. ownership is maintained only if possible bys
+    the user (eg.., root). if not possible file is owned by user running
+    the process.
 
-    ignore will ignore a directory will not scan the directory
-    Returns None
+    symlinks are retained to target of src if the target is out of scope
+    and creates a new symlink to new target in dst if symlink is in scope
+    of src.This is a feature unlike shell linux standard cp or python
+    standard library shutil.copytree would do.
+
+    ignore can be used to ignore certain files (only files not directories)
+    ignore can be a callable that takes filename as input and returns boolean
+    to ignore(True) or not(False)
+
+    logger allows logging to a remote logger.
+    
+    directories are scanned using scandir for efficiency reasons.
+    
+    Returns dst 
     """
     if logger:
         logger.__setattr__("name", "copy")
     
-    # trick to a identify reccursive call or not
-    # else src will be dir entry
+    # To a identify not in reccursive call/ first call to function
+    # else src will be direntry
     if 'scope' not in kwargs:
         src = Path(src)
         kwargs['scope'] = str(os.path.realpath(src))
-    
-    # discard scanning directories and files that are not readable 
+
+    # discard scanning directories and files that are not readable
     if not os.access(src, os.R_OK):
-        raise OSError(f"Skipping: {src.path} cannot be read")
-    
+        raise OSError(f"Skipping: directory {src.path} "
+                      "cannot be read by current user.")
+
     dst = Path(dst)
-    
+
     # disable the function for src that is not a directory
     if src.is_file():
-        raise NotADirectoryError(f"src {src} is a file, pass a directory")
+        raise NotADirectoryError(f"src {str(src)} is a file, pass a directory.")
 
     if not dst.exists():
         os.mkdir(dst)
@@ -126,6 +154,8 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
 
         fi_dst = dst / fi.name
         try:
+            if not os.access(fi, os.R_OK):
+                raise OSError(f"Skipping: {fi.path} file cannot be read.")
             if fi.is_symlink():
                 # to check if the link in scope of original src
                 # use os.readlink(fi) instead?
@@ -138,27 +168,38 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
                     # handle below better for recopy, link could have changed
                     if not fi_dst.exists():
                         os.symlink(newrelpath, fi_dst) 
-                    # permissions of source link are retained.
+                    # times/ownership of source link are retained.
                     set_owner_mode_xattr(fi, fi_dst)
-            
-                # file outside scope of original src
+
+                # file outside the scope of original src
+                # copy and maintain the out-of-scope symlink
                 else:
-                    # maintain the out-of-scope symlink
                     # TODO: new symlink with absolute path?
-                    shutil.copy(fi, fi_dst, follow_symlinks=False)
+                    shutil.copy2(fi, fi_dst, follow_symlinks=False)
                     set_owner_mode_xattr(fi, fi_dst)
             elif fi.is_dir():
                 # reccursive call to copy
                 copy(fi, fi_dst, ignore=ignore, logger=logger, **kwargs)
                 set_owner_mode_xattr(fi, fi_dst)
-            # all files
+            # all regular files
             # if file type is not supported for coping
             # raises error
             elif fi.is_file():
+                # handle recopy
+                if fi_dst.exists():
+                    #sstat = fi.stat()
+                    #dstat = fi_dst.stat()
+
+                    #sstatcmp = [sstat.st_uid, stat.st_gid, sstat.st_mode ]
+                    # handle files that have only read permissions
+                    # copy function needs write access
+                    # so remove the file
+                    if not os.access(fi_dst, os.W_OK):
+                        os.unlink(fi_dst)
                 shutil.copy(fi, fi_dst, follow_symlinks=False)
                 set_owner_mode_xattr(fi, fi_dst)
             else:
-                msg = f"Skipping: {str(fi.path)} is a unsupported file"
+                msg = f"Skipping: {str(fi.path)} is a unsupported file."
                 log_or_print(msg, logger=logger)
 
             if ignore:
@@ -218,6 +259,8 @@ def verify(src, dst):
     return compare
 
 
+# check already if to skip copy attempt by checking reading
+
 def move(src, dst, ignore, logger):
     """
     dirs are created files are moved and directory is deleted if empty
@@ -225,9 +268,8 @@ def move(src, dst, ignore, logger):
 
     src = Path(src)
     dst = Path(dst)
-    
+
     # check if src and dst exist
     # and are directories
-    
-    # for 
 
+    # for
