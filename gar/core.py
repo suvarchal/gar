@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from functools import partial
 from shutil import SameFileError, SpecialFileError
-from .utils import cp_stat, cp_dirstat, user_in_group, dircmp
+from .utils import cp_stat, cp_dirstat, user_in_group, dircmp, getgid
 
 
 def set_owner_mode_xattr(src, dst, follow_symlinks=False):
@@ -58,24 +58,25 @@ def log_or_print(msg, logger=None):
 
 
 def handle_exception(ex, fi=None, fi_dst=None, logger=None):
-    if type(ex) == SameFileError:
+    if isinstance(ex, SameFileError):
         msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same"
         log_or_print(msg, logger=logger)
-    elif type(ex) == SpecialFileError:
-        msg = f"Skipping: {str(fi.path)} is a special file"
+    elif isinstance(ex, SpecialFileError):
+        msg = f"Skipping: {str(fi.path)} is unsupported file"
         log_or_print(msg, logger=logger)
-    elif type(ex) == PermissionError:
-        msg = f"{ex}\nHint:Do you have enough permissions to change file ownership?"
+    elif isinstance(ex, PermissionError):
+        msg = f"{ex}\n"\
+               "Hint: Do you have enough permissions to change file ownership?"
         log_or_print(msg, logger=logger)
-    elif type(ex) == OSError:
-        msg = f"{ex}\nHint:Possible racing condition?"
+    elif isinstance(ex, OSError):
+        msg = f"{ex}"
         log_or_print(msg, logger=logger)
-    elif type(ex) == IOError:
-        msg = f"{ex}\nHint:Disk out of space?"
+    elif isinstance(ex,IOError):
+        msg = f"{ex}\nHint: Disk out of space?"
         log_or_print(msg, logger=logger)
-    else:
-        msg = f"{ex}\n Unknown exception to the program"\
-               "raise an issue with developers"
+    else :
+        msg = f"{ex}\n Unknown exception {str(type(ex))} to the program, "\
+               "please raise an issue with developers"
         log_or_print(msg, logger=logger)
 
 def copy(src, dst, ignore=None, logger=None, **kwargs):
@@ -83,43 +84,43 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
     Copies from files and directories from
     `source` to `destination` retaining directory
     structure and file permissions and ownership
+    
+    scandir is used for efficiency reasons
 
     ignore will ignore a directory will not scan the directory
     Returns None
     """
     if logger:
         logger.__setattr__("name", "copy")
-
-    src = Path(src)
+    
+    # trick to a identify reccursive call or not
+    # else src will be dir entry
+    if 'scope' not in kwargs:
+        src = Path(src)
+        kwargs['scope'] = str(os.path.realpath(src))
+    
+    # discard scanning directories and files that are not readable 
+    if not os.access(src, os.R_OK):
+        raise OSError(f"Skipping: {src.path} cannot be read")
+    
     dst = Path(dst)
     
     # disable the function for src that is not a directory
     if src.is_file():
         raise NotADirectoryError(f"src {src} is a file, pass a directory")
 
-    # a trick to send original src information to
-    # recursive call of the function
-    if 'scope' not in kwargs:
-        kwargs['scope'] = str(os.path.realpath(src))
-
     if not dst.exists():
-        #os.makedirs(dst)
         os.mkdir(dst)
-        # do not raise exceptions here so that root dirs can be scanned recursively
-        try:
-            set_owner_mode_xattr(src, dst)
-        except Exception as ex:
-            pass
 
     # enquiring file stat on DirEntry of scandir is
     # siginicantly faster then using scr.iterdir()
     # or os.walk()
     for fi in os.scandir(src):
-        # is destination writable?
         # is contains enough space?
-        # filter for files and group
-        # ignore only files otherwise scanning dirs owned by root is not possible
-        if ignore is not None:
+        # filter for files
+        # ignore only files otherwise scanning dirs owned
+        # by root is not possible
+        if ignore:
             if fi.is_file() and ignore(fi):
                 continue
 
@@ -127,75 +128,57 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
         try:
             if fi.is_symlink():
                 # to check if the link in scope of original src
+                # use os.readlink(fi) instead?
                 commonpath = os.path.commonpath([os.path.realpath(fi),
-                                                 src.absolute()])
+                                                 kwargs['scope']])
                 # check if target of link is within original src
                 # if so dont copy, just link
                 if commonpath == kwargs['scope']:
                     newrelpath = os.path.relpath(os.path.realpath(fi), src)
-                    # handle below better then exists, link could have changed
+                    # handle below better for recopy, link could have changed
                     if not fi_dst.exists():
                         os.symlink(newrelpath, fi_dst) 
-                    # permissions of source file are retained.
+                    # permissions of source link are retained.
                     set_owner_mode_xattr(fi, fi_dst)
             
                 # file outside scope of original src
                 else:
                     # maintain the out-of-scope symlink
                     # TODO: new symlink with absolute path?
-                    shutil.copy2(fi, fi_dst, follow_symlinks=False)
+                    shutil.copy(fi, fi_dst, follow_symlinks=False)
                     set_owner_mode_xattr(fi, fi_dst)
             elif fi.is_dir():
                 # reccursive call to copy
-                copy(fi, fi_dst)
+                copy(fi, fi_dst, ignore=ignore, logger=logger, **kwargs)
                 set_owner_mode_xattr(fi, fi_dst)
             # all files
             # if file type is not supported for coping
             # raises error
             elif fi.is_file():
-                shutil.copy2(fi, fi_dst, follow_symlinks=False)
-                os.utime(fi_dst, 
-                         ns=(fi.stat().st_atime_ns, fi.stat().st_mtime_ns),
-                         follow_symlinks=False)
+                shutil.copy(fi, fi_dst, follow_symlinks=False)
                 set_owner_mode_xattr(fi, fi_dst)
             else:
-                msg = f"Skipping: {str(fi.path)} is special file"
-                if logger:
-                    logger.warn(msg)
-                else:
-                    print(msg)
+                msg = f"Skipping: {str(fi.path)} is a unsupported file"
+                log_or_print(msg, logger=logger)
 
-        except SameFileError:
-            msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same"
-            if logger:
-                logger.warn(msg)
-            else:
-                print(msg)
-        except SpecialFileError:
-            msg = f"Skipping: {str(fi.path)} is a special file"
-            print(msg)
-        except PermissionError as ex:
-            msg = "Do you have enough permissions to change file ownership?"
-            if logger:
-                logger.error(f"{fi.path} to {fi_dst} {ex} \n{msg}")
-            else:
-                print(msg, ex)
-        except OSError as ex:
-            msg = "Possible racing condition?"
-            print(ex, msg)
-        except IOError as ex:
-            if logger:
-                logger.critical(ex)
-            else:
-                print(ex)
-    # remove empty not 
-    if ignore is not None:
-        # check if dir not ignored is empty
-        if fi.is_dir() and ignore(fi):
-            try:
-                dst.rmdir()
-            except Exception:
-                pass
+        except Exception as ex:
+            handle_exception(ex, fi, fi_dst, logger)
+        # remove empty directories that are ignored
+        if ignore:
+            # check if dir not ignored is empty
+            print("in ignore",fi_dst)
+            if fi.is_dir() and ignore(fi):
+                try:
+                    print("remove dir", fi_dst)
+                    fi_dst.rmdir()
+                except Exception as ex:
+                    print("del error", ex)
+    try:
+        if not os.path.realpath(src) == kwargs['scope']:
+            set_owner_mode_xattr(src, dst)
+    except Exception as ex:
+        handle_exception(ex, src, dst)
+    return dst
 
 
 def ignore_not_group(group, srcfile, ignorefilegroup=True):
@@ -204,9 +187,14 @@ def ignore_not_group(group, srcfile, ignorefilegroup=True):
         checkfilegroup chgrp
         returns True to ignore and False if not
     """
-    src_stat = srcfile.stat()
-    uig = user_in_group(src_stat.st_uid, group)
+    if isinstance(srcfile, DirEntry):
+        src_stat = srcfile.stat(follow_symlinks=False)
+    else:
+        srcfile = Path(srcfile)
+        src_stat = srcfile.lstat() if srcfile.is_symlink() else srcfile.stat()
 
+    uig = user_in_group(src_stat.st_uid, group)
+    # return false owner in group
     if ignorefilegroup:
         return not uig
     else:
@@ -216,7 +204,7 @@ def ignore_not_group(group, srcfile, ignorefilegroup=True):
 
 def gcopy(group, src, dst):
     """TODO:handle skip from cli"""
-    ignore_fn = partial(ignore_not_group, group) # ignorefilegroup=False)
+    ignore_fn = partial(ignore_not_group, group)
     copy(src, dst, ignore=ignore_fn)
 
 

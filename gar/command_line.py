@@ -71,7 +71,7 @@ def cli_copy(cli, group, src, dst, debug):
     #    raise click.ClickException("Another process for group: {group} running?")
     # ensure lock file doesn't exist.
     with SimpleFileLock(lockfile):
-        copy(src, dst)
+        gcopy(group, src, dst)
     click.echo(f"See log file for errors {logfilepath/'gar.log'}")
 
 @cli.command(name="verify")
