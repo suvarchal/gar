@@ -149,12 +149,13 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
         # filter for files
         # ignore only files otherwise scanning dirs owned
         # by root is not possible
-        if ignore:
-            if fi.is_file() and ignore(fi):
-                continue
-
-        fi_dst = dst / fi.name
         try:
+            if ignore:
+                if fi.is_file() and ignore(fi):
+                    continue
+
+            fi_dst = dst / fi.name
+
             if not os.access(fi, os.R_OK):
                 raise OSError(f"Skipping: {fi.path} file cannot be read.")
             if fi.is_symlink():
