@@ -50,8 +50,8 @@ def set_owner_mode_xattr(src, dst, follow_symlinks=False):
         try:
             os.chown(dst, src_stat.st_uid, src_stat.st_gid,
                      follow_symlinks=follow_symlinks)
-        except PermissionError:
-            raise PermissionError(f"Mismatch: {src} > {dst} "
+        except PermissionError as ex:
+            raise PermissionError(f"Mismatch: {ex.filename}"
                                   "ownership cannot be assigned.")
 
 
@@ -187,17 +187,27 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
             elif fi.is_file():
                 # handle recopy
                 if fi_dst.exists():
-                    #sstat = fi.stat()
-                    #dstat = fi_dst.stat()
+                    sstat = fi.stat()
+                    dstat = fi_dst.stat()
 
-                    #sstatcmp = [sstat.st_uid, stat.st_gid, sstat.st_mode ]
+                    sstatcmp = [sstat.st_uid, sstat.st_gid, sstat.st_mode, sstat.st_size,
+                                sstat.st_atime_ns, sstat.st_mtime_ns]
+                    dstatcmp = [dstat.st_uid, dstat.st_gid, dstat.st_mode, dstat.st_size,
+                                dstat.st_atime_ns, dstat.st_mtime_ns]
+                    
                     # handle files that have only read permissions
                     # copy function needs write access
                     # so remove the file
                     if not os.access(fi_dst, os.W_OK):
                         os.unlink(fi_dst)
-                shutil.copy(fi, fi_dst, follow_symlinks=False)
-                set_owner_mode_xattr(fi, fi_dst)
+                    # copy and change attributes only if files differ
+                    if not sstatcmp == dstatcmp:
+                        shutil.copy(fi, fi_dst, follow_symlinks=False)
+                        set_owner_mode_xattr(fi, fi_dst)
+                    # else skip or log properly
+                else:
+                    shutil.copy(fi, fi_dst, follow_symlinks=False)
+                    set_owner_mode_xattr(fi, fi_dst)
             else:
                 msg = f"Skipping: {str(fi.path)} is a unsupported file."
                 log_or_print(msg, logger=logger)
