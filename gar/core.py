@@ -151,6 +151,9 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
         # by root is not possible
         try:
             if ignore:
+                # temporary fix fi.is_file() doesnt work when not R_OK
+                if not os.access(fi, os.R_OK):
+                    continue
                 if fi.is_file() and ignore(fi):
                     continue
 
