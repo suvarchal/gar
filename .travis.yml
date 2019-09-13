@@ -19,7 +19,6 @@ before_install:
  # - pip install -e .
 script:
  - tox
- - gar --help
 #- pytest --cov-report term-missing --cov=gar
 after_success:
  - coveralls
