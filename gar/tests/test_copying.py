@@ -4,8 +4,8 @@ import pwd
 import grp
 from pathlib import Path
 import shutil
-from gar.core import copy, gcopy, verify
-from gar.utils import hash_cp_stat, hash_walk, dircmp, cp_stat, move
+from gar.core import copy, gcopy, verify, move
+from gar.utils import hash_cp_stat, hash_walk, dircmp, cp_stat
 def test_copy(tempf, tempdir, tempdirwithfiles):
     # src has to be a directory
     with pytest.raises(NotADirectoryError):

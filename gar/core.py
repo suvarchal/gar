@@ -306,7 +306,7 @@ def move(src, dst, ignore=None, logger=None):
         for fi in files:
             # relative src path
             dir_src = os.path.relpath(root, src)
-            fi_src = dir_src / fi
+            fi_src = Path(dir_src) / fi
             dir_dst = dst / dir_src
             dir_dst.mkdir(exists_ok=True)
             fi_dst = dir_dst / fi
@@ -324,7 +324,7 @@ def move(src, dst, ignore=None, logger=None):
         for di in dirs:
             # to ensure not deleteting directories not ignored
             dir_src = os.path.relpath(root, src)
-            dir_src = dir_src / di
+            dir_src = Path(dir_src) / di
 
             dir_dst = dst / dir_src
             if ignore and ignore(dir_dst):
