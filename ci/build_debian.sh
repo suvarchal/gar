@@ -19,3 +19,6 @@ dch --package "gar" --create -v ${TRAVIS_TAG#"v"} -D stable "upstream release"
 # build source and binary
 debuild -us -uc -I -i
 
+# clean up or will cause problems for pytest
+find . -name "python3-gar" -exec rm -r "{}" \;
+
