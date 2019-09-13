@@ -54,8 +54,8 @@ def cp_dirstat(dirpath):
                  'Owner': pwd.getpwuid(fstat.st_uid).pw_name, 
                  'Group': grp.getgrgid(fstat.st_gid).gr_name,
                  'Mode': oct(fstat.st_mode),
-                 'Modified': fstat.st_mtime_ns,
-                 'Accessed': fstat.st_atime_ns}
+                 'Modified': fstat.st_mtime_ns}
+                 #'Accessed': fstat.st_atime_ns}
         return OrderedDict(finfo)
 
 

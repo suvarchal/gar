@@ -197,10 +197,10 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
 
                     sstatcmp = [sstat.st_uid, sstat.st_gid, sstat.st_mode,
                                 sstat.st_size,
-                                sstat.st_atime_ns, sstat.st_mtime_ns]
+                                sstat.st_mtime_ns]
                     dstatcmp = [dstat.st_uid, dstat.st_gid, dstat.st_mode,
                                 dstat.st_size,
-                                dstat.st_atime_ns, dstat.st_mtime_ns]
+                                dstat.st_mtime_ns]
 
                     # handle files that have only read permissions
                     # copy function needs write access
