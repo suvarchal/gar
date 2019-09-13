@@ -108,7 +108,7 @@ def test_filestat(tempf):
 
     os.unlink(tempfcopy)
 
-def test_symlink(tempsym):
+def test_symlink(tempsym, tempdir):
     symf, tempf = tempsym
 
     #check if symlink and target are not same
@@ -119,6 +119,19 @@ def test_symlink(tempsym):
     # check follow links is same as target
     lstat = utils.cp_stat(tempf, follow_symlinks=True)
     assert lstat == lstat2
+
+    symfcopy = tempdir / symf.name
+    shutil.copy2(symf, symfcopy, follow_symlinks=False)
+    # compare only ownership
+    assert utils.cp_linkstat(symf) == utils.cp_linkstat(symfcopy)
+    # also compare access and modified times
+    assert (utils.cp_linkstat(symf, only_ownership=False) ==
+            utils.cp_linkstat(symfcopy, only_ownership=False))
+    # also compare names
+    assert (utils.cp_linkstat(symf, include_name=True, only_ownership=False) ==
+            utils.cp_linkstat(symfcopy, include_name=True,
+                              only_ownership=False))
+    os.unlink(symfcopy)
 
 
 def test_hash_utils(tempf, tempsym, tempdirwithfiles):

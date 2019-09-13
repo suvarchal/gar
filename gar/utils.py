@@ -44,7 +44,9 @@ def group_members(group):
     return gm
 
 def cp_dirstat(dirpath):
-    """ will not reccurse just dir info
+    """ will not reccurse just dir info 
+        name, owner, group, mode, modified and access(?)
+        are reliable way to check ownership and permissions
     """
     dirpath = Path(dirpath)
     fstat = dirpath.stat()
@@ -59,9 +61,13 @@ def cp_dirstat(dirpath):
         return OrderedDict(finfo)
 
 
-def cp_linkstat(fdpath, include_name=True, follow_symlinks=False):
-    """ size not used as it depends on path so comparing doesn't make
-        sense
+def cp_linkstat(fdpath, include_name=True, only_ownership=True,
+                follow_symlinks=False):
+    """return stat on link that can be compared on copy 
+       mode is not used as links are always 777
+       size not used as it depends on path link points to
+       so comparing doesn't make sense
+       ownership option only compares ownership 
     """
     if fdpath.is_symlink():
         if isinstance(fdpath, os.DirEntry):
@@ -70,11 +76,12 @@ def cp_linkstat(fdpath, include_name=True, follow_symlinks=False):
             fdpath = Path(fdpath)
             fstat = fdpath.lstat() if not follow_symlinks else fdpath.stat()
     
-        finfo = {'Owner': pwd.getpwuid(fstat.st_uid).pw_name, 
-                 'Group': grp.getgrgid(fstat.st_gid).gr_name,
-                }
-                 #'Modified': fstat.st_mtime_ns,
-                 #'Accessed': fstat.st_atime_ns}
+        finfo = {'Owner': pwd.getpwuid(fstat.st_uid).pw_name,
+                 'Group': grp.getgrgid(fstat.st_gid).gr_name}
+        
+        if not only_ownership:
+            finfo.update({'Modified': fstat.st_mtime_ns,
+                          'Accessed': fstat.st_atime_ns})
         if include_name:
             finfo.update({'Name': fdpath.name})
         return OrderedDict(finfo)

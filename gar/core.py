@@ -56,6 +56,10 @@ def set_owner_mode_xattr(src, dst, follow_symlinks=False):
 
 
 def log_or_print(msg, logger=None):
+    """ print or log 
+    only one is allowed if both is required ass stdout
+    handler to logger
+    """
     if logger:
         logger.warn(msg)
     else:
@@ -64,6 +68,8 @@ def log_or_print(msg, logger=None):
 
 def handle_exception(ex, fi=None, fi_dst=None, logger=None):
     """Handle exceptions mostly by type except IOError
+    TODO: group skipping exceptions into a new skipping
+    exception type
     """
     if type(ex) == SameFileError:
         msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same."
@@ -204,9 +210,11 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
 
                     # handle files that have only read permissions
                     # copy function needs write access
-                    # so remove the file
+                    # so remove the file and recopy
                     if not os.access(fi_dst, os.W_OK):
                         os.unlink(fi_dst)
+                        shutil.copy(fi, fi_dst, follow_symlinks=False)
+                        set_owner_mode_xattr(fi, fi_dst)
                     # copy and change attributes only if files differ
                     if not sstatcmp == dstatcmp:
                         shutil.copy(fi, fi_dst, follow_symlinks=False)

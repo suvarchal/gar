@@ -46,6 +46,7 @@ def tempdirwithfiles(tempdir, create_users):
             |-tf1 (5 bytes)
             |-tf2 (symlink to td/tf2)
             |-tf3 (file with permissions 640 )
+            |-tf4 (file with permissions 444)
     """
     def create_files(user=None):
         sdir = tempfile.mkdtemp(dir=tempdir)
@@ -63,31 +64,43 @@ def tempdirwithfiles(tempdir, create_users):
         _, tf3 = tempfile.mkstemp(dir=tempdir)
         Path(tf3).write_bytes(b"tempo")
         os.chmod(tf3, 0o640)
+        # file with permissions 444
+        _, tf4 = tempfile.mkstemp(dir=tempdir)
+        Path(tf4).write_bytes(b"tempo")
+        os.chmod(tf4, 0o444)
         if user:
-            gid = pwd.getpwnam(user).pw_gid
-            group_name = grp.getgrnam(gid).gr_name
-            status = os.system(f"sudo chown -R {sdir} {user}:{group_name}")
+            try:
+                uid = pwd.getpwnam(user).pw_uid
+                gid = pwd.getpwnam(user).pw_gid
+            except KeyError:
+                raise KeyError("User {user} doesn't exist")
+
+            # reccursively change permisions of sdir and alll 
+            # created files above
+            # os.chown(sdir, uid, gid)
+            # easier to do reccursive call from system
+            status = os.system(f"chown -R {uid}:{gid} {sdir}")
+            # check if command is successful
             assert status == 0
-            status = os.system(f"sudo chown {tf1} {user}:{group_name}")
-            assert status == 0
-            status = os.system(f"sudo chown {tf2} {user}:{group_name}")
-            assert status == 0
-        return (tempdir, sdir, tf1, tf2, renamedlink_tf1, link_tf2)
-    if create_users:
-        (groups, users) = create_users
-        for user in users:
-            create_files(user=user)
-        yield tempdir
-    else:
-        create_files()
-        yield tempdir
+            os.chown(tf1, uid, gid)
+            os.chown(tf2, uid, gid)
+            os.chown(tf3, uid, gid)
+            os.chown(tf4, uid, gid)
+        return tempdir
+
+    #if create_users:
+    groups, users = create_users
+    # scan keys of users dict
+    for user in users:
+        create_files(user=user)
+    yield tempdir
     # cleanup not necessary because tempdir is cleaned up anyway
     # shutil.rmtree(tempdir) if Path(tempdir).exists() else None
 
 @pytest.fixture(scope="session")
 def create_users():
     """ Create 3 users and 2 groups """
-    # if in CI or root
+    # if in CI or root for container tests
     if os.environ.get('CI') or os.access("/", os.W_OK):
         groups = ["group1", "group2"]
         users = {"user1": ["group1"], "user2": ["group1", "group2"], "user3": ["group2"]}
@@ -109,4 +122,6 @@ def create_users():
         for u in created_users:
             os.system(f"sudo userdel -r {u}")
     else:
-        yield None
+        user = os.getlogin()
+        groups = [grp.getgrgid(g).gr_name for g in os.getgroups()]
+        yield (None, {user: [groups]})

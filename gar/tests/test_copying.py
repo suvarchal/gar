@@ -35,6 +35,30 @@ def test_copy(tempf, tempdir, tempdirwithfiles):
     assert hash_walk(tempdirwithfiles) == hash_walk(testcopydir)
     assert mismatch == []
     assert miss == []
+
+    # test recopy
+    # save prev hash
+    prev_copy_hash = hash_walk(testcopydir)
+    copy(tempdirwithfiles, testcopydir)
+    new_copy_hash = hash_walk(testcopydir)
+    # check no changes
+    _, mismatch, miss = dircmp(tempdirwithfiles, testcopydir)
+    print("in recopy")
+    if not mismatch == []:
+        for f in mismatch:
+            print(f"{f[1]}: {os.stat(f[1])}", f"{f[2]}: {os.stat(f[2])}")
+    
+    # assert prev_copy_hash == new_copy_hash
+    print("in recopy",miss)
+    if not miss == []:
+        for f in miss:
+            print(os.system(f"ls -lrt {f[0]}"))
+            print(os.system(f"ls -lrt {f[1]}"))
+    assert mismatch == []
+    assert miss == []
+
+    #print(tempdirwithfiles.name)
+
     shutil.rmtree(testcopydir)
 
 
