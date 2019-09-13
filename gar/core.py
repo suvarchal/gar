@@ -308,18 +308,22 @@ def move(src, dst, ignore=None, logger=None):
             dir_src = os.path.relpath(root, src)
             fi_src = Path(dir_src) / fi
             dir_dst = dst / dir_src
-            dir_dst.mkdir(exists_ok=True)
+            #dir_dst.mkdir(exist_ok=True)
             fi_dst = dir_dst / fi
             try:
-                dir_dst.mkdir(exists_ok=True)
-                os.rename(fi_src, fi_dst)
+                dir_dst.mkdir(exist_ok=True)
+                os.rename(os.path.join(root,fi), fi_dst)
             # if dst is different device then copy and remove
             except OSError:
-                shutil.copy(fi_src, fi_dst)
-                set_owner_mode_xattr(fi_src, fi_dst)
-                os.unlink(fi_src)
-            except Exception as ex:
-                handle_exception(ex, fi_src, fi_dst, logger)
+                try:
+                    shutil.copy(os.path.join(root,fi), fi_dst, follow_symlinks=False)
+                    set_owner_mode_xattr(os.path.join(root,fi), fi_dst)
+                    os.unlink(os.path.join(root,fi))
+                except Exception as ex:
+                    raise ex
+            else:
+                raise ex
+                #handle_exception(ex, fi_src, fi_dst, logger)
         # set dst dir properties and remove src
         for di in dirs:
             # to ensure not deleteting directories not ignored
@@ -331,8 +335,8 @@ def move(src, dst, ignore=None, logger=None):
                 continue
             try:
                 # dst exists?
-                set_owner_mode_xattr(dir_src, dir_dst)
-                os.rmdir(dir_src)
+                set_owner_mode_xattr(os.path.join(root,di), dir_dst)
+                os.rmdir(os.path.join(root,di))
             # if dir is not empty
             except OSError as ex:
                 handle_exception(ex)
