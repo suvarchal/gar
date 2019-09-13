@@ -1,5 +1,6 @@
 FROM debian:buster as buster
 RUN apt-get update -y && apt-get install python3 -y --fix-missing
+RUN apt-get install sudo -y
 RUN apt-get install python3-setuptools -y --fix-missing
 RUN apt-get install python3-pytest -y --fix-missing
 RUN apt-get install git -y --fix-missing
@@ -13,6 +14,7 @@ RUN py.test-3
 
 FROM debian:bullseye as bullseye
 RUN apt-get update -y && apt-get install python3 -y 
+RUN apt-get install sudo -y
 RUN apt-get install python3-setuptools -y 
 RUN apt-get install python3-pytest -y 
 RUN apt-get install git -y --fix-missing
@@ -26,6 +28,7 @@ RUN py.test-3
 
 FROM ubuntu:bionic as bionic
 RUN apt-get update -y && apt-get install python3 -y 
+RUN apt-get install sudo -y
 RUN apt-get install python3-setuptools -y 
 RUN apt-get install python3-pytest -y 
 RUN apt-get install git -y --fix-missing
