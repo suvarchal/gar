@@ -85,6 +85,7 @@ def handle_exception(ex, fi=None, fi_dst=None, logger=None):
     elif type(ex) == FileNotFoundError:
         msg = f"Skipping: {ex}\n"\
                "\t Hint: Possible racing condition?"
+        log_or_print(msg, logger=logger)
     elif type(ex) == OSError:
         msg = f"{ex}"
         log_or_print(ex, logger=logger)
@@ -96,7 +97,7 @@ def handle_exception(ex, fi=None, fi_dst=None, logger=None):
     else:
         msg = f"{ex}\n Unknown exception {ex.args[0]} to the program, "\
                "please raise an issue with developers."
-        log_or_print(msg)
+        log_or_print(msg, logger=logger)
 
 
 def copy(src, dst, ignore=None, logger=None, **kwargs):
@@ -244,7 +245,7 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
         if not os.path.realpath(src) == kwargs['scope']:
             set_owner_mode_xattr(src, dst)
     except Exception as ex:
-        handle_exception(ex, src, dst)
+        handle_exception(ex, src, dst, logger)
     return dst
 
 
