@@ -44,21 +44,12 @@ def test_copy(tempf, tempdir, tempdirwithfiles):
     new_copy_hash = hash_walk(testcopydir)
     # check no changes
     _, mismatch, miss, skip = dircmp(tempdirwithfiles, testcopydir)
-    print("in recopy")
-    if not mismatch == []:
-        for f in mismatch:
-            print(f"{f[1]}: {cp_stat(f[1])}", f"{f[2]}: {cp_stat(f[2])}")
-    
-    # assert prev_copy_hash == new_copy_hash
-    print("in recopy",miss)
-    if not miss == []:
-        for f in miss:
-            print(os.system(f"ls -lrt {f[0]}"))
-            print(os.system(f"ls -lrt {f[1]}"))
+    pmismatch = [(cp_stat(f[1]), cp_stat(f[2])) for f in mismatch if f]
+    print(pmismatch)
+
+    assert prev_copy_hash == new_copy_hash
     assert mismatch == []
     assert miss == []
-
-    #print(tempdirwithfiles.name)
 
     shutil.rmtree(testcopydir)
 
@@ -73,9 +64,8 @@ def test_gcopy(tempdirwithfiles):
     print("match :", match)
     print("mismatch :", mismatch)
     print("miss :", miss)
-    if not mismatch == []:
-        for f in mismatch:
-            print(f"{f[1]}: {cp_stat(f[1])}", f"{f[2]}: {cp_stat(f[2])}")
+    pmismatch = [(cp_stat(f[1]), cp_stat(f[2])) for f in mismatch if f]
+    print(pmismatch)
     # check has to be based on groups
     assert match
     #assert hash_walk(tempdirwithfiles) == hash_walk(testcopydir)
@@ -93,7 +83,6 @@ def test_verify(tempdirwithfiles):
     copy(tempdirwithfiles, tempdircopy)
     compare = verify(str(tempdirwithfiles), str(tempdircopy))
     assert isinstance(compare, dict)
-    print(compare)
     assert compare['Mismatch'] == []
     assert compare['Miss'] == []
     shutil.rmtree(tempdircopy)
