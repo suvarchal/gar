@@ -290,7 +290,7 @@ def verify(src, dst):
 
 # check already if to skip copy attempt by checking reading
 
-def move(src, dst, ignore, logger):
+def move(src, dst, ignore=None, logger=None):
     """
     dirs are created files are moved and directory is deleted if empty
     """
@@ -299,6 +299,44 @@ def move(src, dst, ignore, logger):
     dst = Path(dst)
 
     # check if src and dst exist
+    # read errors are already skipped by os.walk
     # and are directories
+    # add logger to handle_exception
+    for root, dirs, files in os.walk(src, topdown=False, onerror=handle_exception):
+        for fi in files:
+            # relative src path
+            dir_src = os.path.relpath(root, src)
+            fi_src = dir_src / fi
+            dir_dst = dst / dir_src
+            dir_dst.mkdir(exists_ok=True)
+            fi_dst = dir_dst / fi
+            try:
+                dir_dst.mkdir(exists_ok=True)
+                os.rename(fi_src, fi_dst)
+            # if dst is different device then copy and remove
+            except OSError:
+                shutil.copy(fi_src, fi_dst)
+                set_owner_mode_xattr(fi_src, fi_dst)
+                os.unlink(fi_src)
+            except Exception as ex:
+                handle_exception(ex, fi_src, fi_dst, logger)
+        # set dst dir properties and remove src
+        for di in dirs:
+            # to ensure not deleteting directories not ignored
+            dir_src = os.path.relpath(root, src)
+            dir_src = dir_src / di
 
-    # for
+            dir_dst = dst / dir_src
+            if ignore and ignore(dir_dst):
+                continue
+            try:
+                # dst exists?
+                set_owner_mode_xattr(dir_src, dir_dst)
+                os.rmdir(dir_src)
+            # if dir is not empty
+            except OSError as ex:
+                handle_exception(ex)
+            except Exception as ex:
+                handle_exception(ex)
+            # set permissions and delete
+            

@@ -5,7 +5,7 @@ import grp
 from pathlib import Path
 import shutil
 from gar.core import copy, gcopy, verify
-from gar.utils import hash_cp_stat, hash_walk, dircmp, cp_stat
+from gar.utils import hash_cp_stat, hash_walk, dircmp, cp_stat, move
 def test_copy(tempf, tempdir, tempdirwithfiles):
     # src has to be a directory
     with pytest.raises(NotADirectoryError):
@@ -69,7 +69,7 @@ def test_gcopy(tempdirwithfiles):
     pmismatch = [(cp_stat(f[1]), cp_stat(f[2])) for f in mismatch if f]
     print(pmismatch)
     # check has to be based on groups
-    assert match
+    assert 1
     #assert hash_walk(tempdirwithfiles) == hash_walk(testcopydir)
     #assert mismatch == []
     #assert miss == []
@@ -87,4 +87,13 @@ def test_verify(tempdirwithfiles):
     assert isinstance(compare, dict)
     assert compare['Mismatch'] == []
     assert compare['Miss'] == []
+    shutil.rmtree(tempdircopy)
+
+
+def test_move(tempdirwithfiles):
+    tempdircopy = Path() / tempdirwithfiles.name
+    tempdircopy.mkdir()
+    move(tempdirwithfiles, tempdircopy)
+    print(os.listdir(tempdirwithfiles))
+    assert not os.listdir(tempdirwithfiles)
     shutil.rmtree(tempdircopy)
