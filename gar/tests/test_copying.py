@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import shutil
 from gar.core import copy, gcopy, verify
-from gar.utils import hash_cp_stat, hash_walk, dircmp
+from gar.utils import hash_cp_stat, hash_walk, dircmp, cp_stat
 def test_copy(tempf, tempdir, tempdirwithfiles):
     # src has to be a directory
     with pytest.raises(NotADirectoryError):
@@ -46,7 +46,7 @@ def test_copy(tempf, tempdir, tempdirwithfiles):
     print("in recopy")
     if not mismatch == []:
         for f in mismatch:
-            print(f"{f[1]}: {os.stat(f[1])}", f"{f[2]}: {os.stat(f[2])}")
+            print(f"{f[1]}: {cp_stat(f[1])}", f"{f[2]}: {cp_stat(f[2])}")
     
     # assert prev_copy_hash == new_copy_hash
     print("in recopy",miss)

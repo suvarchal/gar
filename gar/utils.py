@@ -185,22 +185,22 @@ def dircmp(src, dst):
             fidp = os.path.relpath(os.path.abspath(fisp), src)
             fidp = dst / fidp
             if not fidp.exists():
-                miss.append((str(fisp),str(fidp)))
+                miss.append((str(fisp), str(fidp)))
                 continue
             if cp_stat(fisp) == cp_stat(fidp):
-                match.append((str(fisp),str(fidp)))
+                match.append((str(fisp), str(fidp)))
             else:
                 #mismatch.append(('file',cp_stat(fisp),cp_stat(fidp)))
-                mismatch.append(('file',str(fisp),str(fidp)))
+                mismatch.append(('file', str(fisp), str(fidp)))
         for di in sdirs:
             dsp = sroot / di
             ddp = os.path.relpath(os.path.abspath(dsp), src)
             ddp = dst / ddp
             if not ddp.exists():
-                miss.append((str(dsp),str(ddp)))
+                miss.append((str(dsp), str(ddp)))
                 continue
             if cp_stat(dsp) == cp_stat(ddp):
-                match.append((str(dsp),str(ddp)))
+                match.append((str(dsp), str(ddp)))
             else:
                 #mismatch.append(('dir',cp_stat(dsp),cp_stat(ddp)))
                 mismatch.append(('dir', str(dsp), str(ddp)))

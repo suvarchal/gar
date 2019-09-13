@@ -40,7 +40,7 @@ def tempdir():
 @pytest.fixture(scope="function")
 def tempdirwithfiles(tempdir, create_users):
     """ tempdir
-            |-sdir/
+            |-sdir/ (directory with permissions 700)
                 |-tf2
                 |-renamedlink (relative symlink to ../tf1)
             |-tf1 (5 bytes)
@@ -68,6 +68,12 @@ def tempdirwithfiles(tempdir, create_users):
         _, tf4 = tempfile.mkstemp(dir=tempdir)
         Path(tf4).write_bytes(b"tempo")
         os.chmod(tf4, 0o444)
+        # directory with permissions 750
+        # sdir2 = tempfile.mkdtemp(dir=tempdir)
+        # os.chmod(sdir2, 0o750)
+        # directory with permissions 700
+        # sdir2 = tempfile.mkdtemp(dir=tempdir)
+        # os.chmod(sdir3, 0o700)
         if user:
             try:
                 uid = pwd.getpwnam(user).pw_uid
@@ -75,7 +81,7 @@ def tempdirwithfiles(tempdir, create_users):
             except KeyError:
                 raise KeyError("User {user} doesn't exist")
 
-            # reccursively change permisions of sdir and alll 
+            # reccursively change permisions of sdir and all
             # created files above
             # os.chown(sdir, uid, gid)
             # easier to do reccursive call from system
