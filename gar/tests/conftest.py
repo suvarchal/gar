@@ -135,6 +135,6 @@ def create_users():
         for u in created_users:
             os.system(f"sudo userdel -r {u}")
     else:
-        user = os.getlogin()
+        user = pwd.getpwuid(os.geteuid()).pw_name
         groups = [grp.getgrgid(g).gr_name for g in os.getgroups()]
         yield (None, {user: [groups]})

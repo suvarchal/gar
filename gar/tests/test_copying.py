@@ -1,5 +1,7 @@
 import pytest
 import os
+import pwd
+import grp
 from pathlib import Path
 import shutil
 from gar.core import copy, gcopy, verify
@@ -55,10 +57,10 @@ def test_copy(tempf, tempdir, tempdirwithfiles):
 
 
 def test_gcopy(tempdirwithfiles):
-    user = os.getlogin() or os.getenv("USER")
+    group = grp.getgrgid(os.getegid()).gr_name
     testcopydir = Path() / tempdirwithfiles.name
     testcopydir.mkdir()
-    gcopy(user, tempdirwithfiles, testcopydir)
+    gcopy(group, tempdirwithfiles, testcopydir)
     
     match, mismatch, miss, skip = dircmp(tempdirwithfiles, testcopydir)
     print("match :", match)

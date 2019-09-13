@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import shutil
+import grp
 from click.testing import CliRunner
 from gar.command_line import cli
 # from gar.logger import logfilepath
@@ -31,11 +32,10 @@ def test_command_line_invoke():
 
 def test_command_line_copy(tempdirwithfiles):
     runner = CliRunner()
-    user = os.getlogin() or os.getenv("USER")
-    print(user)
+    group = grp.getgrgid(os.getegid()).gr_name
     td = Path(tempdirwithfiles.name)
     td.mkdir()
-    result = runner.invoke(cli, ["copy", user,
+    result = runner.invoke(cli, ["copy", group,
                                  str(tempdirwithfiles), str(td)])
     assert result.exit_code == 0
 
