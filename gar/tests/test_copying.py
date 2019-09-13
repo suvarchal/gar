@@ -92,8 +92,11 @@ def test_verify(tempdirwithfiles):
 
 def test_move(tempdirwithfiles):
     tempdircopy = Path() / tempdirwithfiles.name
+    ls_dir = os.listdir(tempdirwithfiles)
     tempdircopy.mkdir()
     move(tempdirwithfiles, tempdircopy)
     print(os.listdir(tempdirwithfiles))
     assert not os.listdir(tempdirwithfiles)
+    print(ls_dir, os.listdir(tempdircopy))
+    assert sorted(ls_dir) == sorted(os.listdir(tempdircopy))
     shutil.rmtree(tempdircopy)
