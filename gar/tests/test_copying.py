@@ -48,6 +48,9 @@ def test_gcopy(tempdirwithfiles):
     print("match :", match)
     print("mismatch :", mismatch)
     print("miss :", miss)
+    if not mismatch == []:
+        for f in mismatch:
+            print(os.stat(f[1]), os.stat(f[2]))
     assert hash_walk(tempdirwithfiles) == hash_walk(testcopydir)
     assert mismatch == []
     assert miss == []
