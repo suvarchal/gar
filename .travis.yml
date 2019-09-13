@@ -16,7 +16,7 @@ before_install:
  - travis_retry pip install python-coveralls
  - travis_retry pip install click
  - travis_retry pip install tox
- - pip install -e .
+ # - pip install -e .
 script:
  - tox
  - gar --help

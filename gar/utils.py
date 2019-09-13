@@ -143,7 +143,6 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
     """ Returns hash for entire directory tree using default hash.
         function only scans for files, directories and symlinks:
         special files are ignored by the has function
-        
     """
     if not isinstance(fdpath, Path):
         fdpath = Path(fdpath)
