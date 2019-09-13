@@ -99,6 +99,13 @@ def tempdirwithfiles(tempdir, create_users):
     # scan keys of users dict
     for user in users:
         create_files(user=user)
+
+    # handle files common to multiple users
+    # a dangling symlink 
+    os.symlink(tempdir/"dangto", tempdir/"dang")
+    # and reccursive symlink
+    os.symlink(tempdir/"symreccursive", tempdir/"symreccursive")
+
     yield tempdir
     # cleanup not necessary because tempdir is cleaned up anyway
     # shutil.rmtree(tempdir) if Path(tempdir).exists() else None

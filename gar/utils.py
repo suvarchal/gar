@@ -155,20 +155,26 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
     for root, dirs, files in os.walk(fdpath):
         root = Path(root)
         # functions called ignore all other kinds of files (eg.., device files)
-        # add ignored clause? 
+        # ignore read errors
         for fi in sorted(files):
+            # skip files that are not readable
+            if not os.access(fi, os.R_OK):
+                continue
             fip = root / fi
             files_hash.update(hash_cp_stat(fip, hash_function=sha1).hexdigest().encode())
         for d in sorted(dirs):
+            # remove directory that are not readable from traversing further
+            if not os.access(d, os.R_OK):
+                dirs.remove(d)
+                continue
             dp = root / d
             files_hash.update(hash_cp_stat(dp, hash_function=sha1).hexdigest().encode())
     return files_hash.hexdigest()
 
 def dircmp(src, dst):
     """ Compares files in src to dst for integrity
-    returns list of match, missmatch, and misses
+    returns list of match, missmatch, skip and misses
 
-    TODO: add skip for special files and read errors
     """
     if not (isinstance(src, Path) and isinstance(dst, Path)):
         src = Path(src)
@@ -178,12 +184,18 @@ def dircmp(src, dst):
     match = []
     mismatch = []
     miss = []
+    skip = []
     for sroot, sdirs, sfiles in os.walk(src, followlinks=False):
         sroot = Path(sroot)
         for fi in sfiles:
             fisp = sroot / fi
             fidp = os.path.relpath(os.path.abspath(fisp), src)
             fidp = dst / fidp
+            # skips any unsupported file and
+            # read errors (eg.., permissions, linkerrors)
+            if not os.access(fi, os.R_OK):
+                skip.append(fi)
+                continue
             if not fidp.exists():
                 miss.append((str(fisp), str(fidp)))
                 continue
@@ -196,6 +208,8 @@ def dircmp(src, dst):
             dsp = sroot / di
             ddp = os.path.relpath(os.path.abspath(dsp), src)
             ddp = dst / ddp
+            # not necessary to check os.R_OK of symlink dir 
+            # because dir links are not resolved by os.walk
             if not ddp.exists():
                 miss.append((str(dsp), str(ddp)))
                 continue
@@ -204,7 +218,7 @@ def dircmp(src, dst):
             else:
                 #mismatch.append(('dir',cp_stat(dsp),cp_stat(ddp)))
                 mismatch.append(('dir', str(dsp), str(ddp)))
-    return (match, mismatch, miss)
+    return (match, mismatch, miss, skip)
 
 
 

@@ -56,7 +56,7 @@ __shorthelp = "Copy files and directories for a group"
 @click.argument("dst", type=click.Path(exists=True))
 @click.option("--debug/-d", is_flag=True, show_default=True, default=False)
 @pass_cli
-def cli_copy(cli, group, src, dst, debug):
+def cli_copy(cli_class, group, src, dst, debug):
     """Archive copy
     Copies files and directories for a group from src to dst
     retaining owner, permissions, and attributes of files and
@@ -65,13 +65,13 @@ def cli_copy(cli, group, src, dst, debug):
     """
     if Path(src).resolve() == Path(dst).resolve():
         raise click.ClickException(f"src: {src} and dst: {dst} are same?")
-    cli.setLevel(debug) if not debug == cli.debug else None
+    cli_class.setLevel(debug) if not debug == cli_class.debug else None
     lockfile = f"gar.{getgid(group)}.lock"
     #if (lockpath / lockfile).exists():
     #    raise click.ClickException("Another process for group: {group} running?")
     # ensure lock file doesn't exist.
     with SimpleFileLock(lockfile):
-        gcopy(group, src, dst)
+        gcopy(group, src, dst, logger=cli_class.logger)
     click.echo(f"See log file for errors {logfilepath/'gar.log'}")
 
 @cli.command(name="verify")

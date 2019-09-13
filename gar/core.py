@@ -269,10 +269,10 @@ def ignore_not_group(group, srcfile, ignorefilegroup=True):
         return not (src_stat.st_gid == gid or uig)
 
 
-def gcopy(group, src, dst):
+def gcopy(group, src, dst, logger=None):
     """TODO:handle skip from cli"""
     ignore_fn = partial(ignore_not_group, group)
-    copy(src, dst, ignore=ignore_fn)
+    copy(src, dst, ignore=ignore_fn, logger=logger)
 
 
 def verify(src, dst):
@@ -280,7 +280,7 @@ def verify(src, dst):
     """
     src = Path(src)
     dst = Path(dst)
-    match, mismatch, miss = dircmp(src, dst)
+    match, mismatch, miss, skip = dircmp(src, dst)
     compare = {'Match': match,
                'Mismatch': mismatch,
                'Miss': miss}
