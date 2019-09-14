@@ -96,7 +96,25 @@ def test_move(tempdirwithfiles):
     tempdircopy.mkdir()
     move(tempdirwithfiles, tempdircopy)
     print(os.listdir(tempdirwithfiles))
+    # check no files exist anymore in src
     assert not os.listdir(tempdirwithfiles)
+    print(ls_dir, os.listdir(tempdircopy))
+    # check if dir contents are same as before
+    # better use walk
+    assert sorted(ls_dir) == sorted(os.listdir(tempdircopy))
+    shutil.rmtree(tempdircopy)
+
+
+def test_gmove(tempdirwithfiles):
+    group = grp.getgrgid(os.getegid()).gr_name
+    tempdircopy = Path() / tempdirwithfiles.name
+    ls_dir = os.listdir(tempdirwithfiles)
+    tempdircopy.mkdir()
+    gmove(group, tempdirwithfiles, tempdircopy)
+    print(os.listdir(tempdirwithfiles))
+    # check no contents exist for the group
+    assert not os.listdir(tempdirwithfiles)
+    # check if dir contents are same as before
     print(ls_dir, os.listdir(tempdircopy))
     assert sorted(ls_dir) == sorted(os.listdir(tempdircopy))
     shutil.rmtree(tempdircopy)

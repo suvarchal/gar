@@ -70,7 +70,11 @@ def handle_exception(ex, fi=None, fi_dst=None, logger=None):
     """Handle exceptions mostly by type except IOError
     TODO: group skipping exceptions into a new skipping
     exception type
+    fine grain OSError based on error code (eg.., cannot delete etc)
+    os.EX_DATAERR ...
+    fine grain help based on error code of exception (ex.errno)
     """
+
     if type(ex) == SameFileError:
         msg = f"Skipping: {str(fi.path)} and {str(fi_dst)} are same."
         log_or_print(msg, logger=logger)
@@ -93,9 +97,9 @@ def handle_exception(ex, fi=None, fi_dst=None, logger=None):
     elif isinstance(ex, IOError):
         msg = f"{ex}\n\tHint: Disk out of space?"
         log_or_print(msg, logger=logger)
-    # raise error if other exceptions occur
+    # all other exceptions are logged as 
     else:
-        msg = f"{ex}\n Unknown exception {ex.args[0]} to the program, "\
+        msg = f"{ex}\n CRITICAL: an unknown exception to the program, "\
                "please raise an issue with developers."
         log_or_print(msg, logger=logger)
 
@@ -314,19 +318,20 @@ def move(src, dst, ignore=None, logger=None):
                 dir_dst.mkdir(exist_ok=True)
                 os.rename(os.path.join(root,fi), fi_dst)
             # if dst is different device then copy and remove
+            # TODO: use error code instead of broad OSError
             except OSError:
                 try:
                     shutil.copy(os.path.join(root,fi), fi_dst, follow_symlinks=False)
                     set_owner_mode_xattr(os.path.join(root,fi), fi_dst)
                     os.unlink(os.path.join(root,fi))
+                # catch all exceptions
                 except Exception as ex:
-                    raise ex
-            else:
-                raise ex
-                #handle_exception(ex, fi_src, fi_dst, logger)
+                    handle_exception(ex, fi, fi_dst, logger=logger)
+            except Exception as ex:
+                handle_exception(ex, fi, fi_dst, logger)
         # set dst dir properties and remove src
         for di in dirs:
-            # to ensure not deleteting directories not ignored
+            # to ensure not deleteting directories when not ignored
             dir_src = os.path.relpath(root, src)
             dir_src = Path(dir_src) / di
 
@@ -334,13 +339,16 @@ def move(src, dst, ignore=None, logger=None):
             if ignore and ignore(dir_dst):
                 continue
             try:
-                # dst exists?
+                # handle if dst exists?
                 set_owner_mode_xattr(os.path.join(root,di), dir_dst)
                 os.rmdir(os.path.join(root,di))
-            # if dir is not empty
-            except OSError as ex:
-                handle_exception(ex)
+            # if dir is not empty and other exceptions
             except Exception as ex:
                 handle_exception(ex)
             # set permissions and delete
             
+
+def gmove(group, src, dst, logger=None):
+    """TODO:handle skip from cli"""
+    ignore_fn = partial(ignore_not_group, group)
+    move(src, dst, ignore=ignore_fn, logger=logger)
