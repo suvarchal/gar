@@ -302,6 +302,9 @@ def move(src, dst, ignore=None, logger=None):
     src = Path(src)
     dst = Path(dst)
 
+    if not (src.is_dir() and dst.is_dir()):
+        raise NotADirectoryError(f"src: {src} and dst: {dst} must be directories")
+
     # check if src and dst exist
     # read errors are already skipped by os.walk
     # and are directories
