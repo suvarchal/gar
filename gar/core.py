@@ -321,7 +321,7 @@ def move(src, dst, ignore=None, logger=None):
                     os.unlink(os.path.join(root,fi))
                 except Exception as ex:
                     raise ex
-            else Exception as ex:
+            else:
                 raise ex
                 #handle_exception(ex, fi_src, fi_dst, logger)
         # set dst dir properties and remove src
