@@ -1,6 +1,7 @@
 import os
 from os import DirEntry
 import shutil
+from shutil import copy2 as scopy
 from pathlib import Path
 from functools import partial
 from shutil import SameFileError, SpecialFileError
@@ -317,42 +318,41 @@ def move(src, dst, ignore=None, logger=None):
     # read errors are already skipped by os.walk
     # and are directories
     # add logger to handle_exception
-    for root, dirs, files in os.walk(src, topdown=False, onerror=handle_exception):
+    for rpath, dirs, files in os.walk(src, topdown=False, onerror=handle_exception):
         for fi in files:
-            # relative src path
-            dir_src = os.path.relpath(root, src)
-            fi_src = Path(dir_src) / fi
-            dir_dst = dst / dir_src
-            #dir_dst.mkdir(exist_ok=True)
+            # path to src 
+            fi_src = src / rpath / fi
+            dir_dst = dst / rpath
             fi_dst = dir_dst / fi
             try:
                 dir_dst.mkdir(exist_ok=True)
-                os.rename(os.path.join(root,fi), fi_dst)
+                os.rename(fi_src, fi_dst)
             # if dst is different device then copy and remove
             # TODO: use error code instead of broad OSError
+            # log this activity
             except OSError:
                 try:
-                    shutil.copy(os.path.join(root,fi), fi_dst, follow_symlinks=False)
-                    set_owner_mode_xattr(os.path.join(root,fi), fi_dst)
-                    os.unlink(os.path.join(root,fi))
+                    scopy(fi_src, fi_dst, follow_symlinks=False)
+                    set_owner_mode_xattr(fi_src, fi_dst)
+                    os.unlink(fi_src)
                 # catch all exceptions
                 except Exception as ex:
-                    handle_exception(ex, fi, fi_dst, logger=logger)
+                    handle_exception(ex, fi_src, fi_dst, logger=logger)
             except Exception as ex:
-                handle_exception(ex, fi, fi_dst, logger)
+                handle_exception(ex, fi_src, fi_dst, logger)
         # set dst dir properties and remove src
         for di in dirs:
+            # source dir path
+            dir_src = src / rpath / di
+            # check if dir exists? it must when os.walk if not top down
+            dir_dst = dst / rpath / di
             # to ensure not deleteting directories when not ignored
-            dir_src = os.path.relpath(root, src)
-            dir_src = Path(dir_src) / di
-
-            dir_dst = dst / dir_src
             if ignore and ignore(dir_dst):
                 continue
             try:
                 # handle if dst exists?
-                set_owner_mode_xattr(os.path.join(root,di), dir_dst)
-                os.rmdir(os.path.join(root,di))
+                set_owner_mode_xattr(dir_src, dir_dst)
+                os.rmdir(dir_src)
             # if dir is not empty and other exceptions
             except Exception as ex:
                 handle_exception(ex)
