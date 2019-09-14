@@ -170,7 +170,7 @@ def hash_walk(fdpath, follow_symlinks=False, ignore=None):
             files_hash.update(hash_cp_stat(dp, hash_function=sha1).hexdigest().encode())
     return files_hash.hexdigest()
 
-def dircmp(src, dst):
+def dircmp(src, dst, ignore=None):
     """ Compares files in src to dst for integrity
     returns list of match, missmatch, skip and misses
     use of os.walk makes it skip files and directories
@@ -189,6 +189,9 @@ def dircmp(src, dst):
         sroot = Path(sroot)
         for fi in sfiles:
             fisp = sroot / fi
+            # ignore files if ignore is True
+            if ignore and ignore(fi):
+                continue
             fidp = os.path.relpath(os.path.abspath(fisp), src)
             fidp = dst / fidp
             # skips any unsupported file and

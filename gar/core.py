@@ -61,7 +61,7 @@ def log_or_print(msg, logger=None):
     handler to logger
     """
     if logger:
-        logger.warn(msg)
+        print(msg)
     else:
         print(msg)
 
@@ -243,7 +243,7 @@ def copy(src, dst, ignore=None, logger=None, **kwargs):
                     except OSError:
                         pass
         except Exception as ex:
-            handle_exception(ex, fi, fi_dst, logger)
+            handle_exception(ex, fi, None, logger)
         # remove empty directories that are ignored
     try:
         if not os.path.realpath(src) == kwargs['scope']:
@@ -263,6 +263,8 @@ def ignore_not_group(group, srcfile, ignorefilegroup=True):
         src_stat = srcfile.stat(follow_symlinks=False)
     else:
         srcfile = Path(srcfile)
+        if not srcfile.exists():
+            raise FileNotFoundError("File doesn't exist", srcfile)
         src_stat = srcfile.lstat() if srcfile.is_symlink() else srcfile.stat()
 
     uig = user_in_group(src_stat.st_uid, group)
@@ -280,19 +282,25 @@ def gcopy(group, src, dst, logger=None):
     copy(src, dst, ignore=ignore_fn, logger=logger)
 
 
-def verify(src, dst):
-    """ gverify?
+def verify(src, dst, ignore=None):
+    """ returns a dictionary
     """
     src = Path(src)
     dst = Path(dst)
-    match, mismatch, miss, skip = dircmp(src, dst)
+    if not (src.is_dir() and dst.is_dir()):
+        raise NotADirectoryError(f"src: {src} and dst: {dst} must be directories")
+    match, mismatch, miss, skip = dircmp(src, dst, ignore=ignore)
     compare = {'Match': match,
                'Mismatch': mismatch,
-               'Miss': miss}
+               'Miss': miss,
+               'Skipped': skip}
     return compare
 
 
-# check already if to skip copy attempt by checking reading
+def gverify(group, src, dst):
+    ignore_fn = partial(ignore_not_group, group)
+    return verify(src, dst, ignore=ignore_fn)
+
 
 def move(src, dst, ignore=None, logger=None):
     """
