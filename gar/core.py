@@ -306,11 +306,12 @@ def gverify(group, src, dst):
 def move(src, dst, ignore=None, logger=None):
     """
     dirs are created files are moved and directory is deleted if empty
+    symlinks are not copied
     """
 
     src = Path(src)
     dst = Path(dst)
-
+    print('src,dst',src.absolute(),dst.absolute())
     if not (src.is_dir() and dst.is_dir()):
         raise NotADirectoryError(f"src: {src} and dst: {dst} must be directories")
 
@@ -321,9 +322,14 @@ def move(src, dst, ignore=None, logger=None):
     for rpath, dirs, files in os.walk(src, topdown=False, onerror=handle_exception):
         for fi in files:
             # path to src 
-            fi_src = src / rpath / fi
-            dir_dst = dst / rpath
+            fi_src = Path(rpath).absolute() / fi
+            #if not fi_src.exists():
+            #    raise Exception("HELLOOO", src, rpath, fi, fi_src)
+            dir_dst = (dst / Path(rpath).relative_to(src)).absolute()
             fi_dst = dir_dst / fi
+            print("dir dst", dir_dst, dir_dst.exists())
+            print("fi_src, fi dst", fi_src, fi_dst)
+        
             try:
                 dir_dst.mkdir(exist_ok=True)
                 os.rename(fi_src, fi_dst)
@@ -343,9 +349,9 @@ def move(src, dst, ignore=None, logger=None):
         # set dst dir properties and remove src
         for di in dirs:
             # source dir path
-            dir_src = src / rpath / di
+            dir_src = Path(rpath).absolute() / di
             # check if dir exists? it must when os.walk if not top down
-            dir_dst = dst / rpath / di
+            dir_dst = dst / Path(rpath).relative_to(src) / di
             # to ensure not deleteting directories when not ignored
             if ignore and ignore(dir_dst):
                 continue

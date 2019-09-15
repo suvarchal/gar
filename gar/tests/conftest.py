@@ -102,9 +102,9 @@ def tempdirwithfiles(tempdir, create_users):
 
     # handle files common to multiple users
     # a dangling symlink 
-    os.symlink(tempdir/"dangto", tempdir/"dang")
+    #os.symlink(tempdir/"dangto", tempdir/"dang")
     # and reccursive symlink
-    os.symlink(tempdir/"symreccursive", tempdir/"symreccursive")
+    #os.symlink(tempdir/"symreccursive", tempdir/"symreccursive")
 
     yield tempdir
     # cleanup not necessary because tempdir is cleaned up anyway
